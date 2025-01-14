@@ -1,0 +1,9 @@
+# Level 1
+
+World 480 600
+
+PlayerSpeed 250
+
+Bkg Street 0 0
+
+

@@ -1,0 +1,23 @@
+# Game Config
+
+Window  480 600
+ 
+Font    Arial      	../assets/fonts/arial.ttf
+Font    main       	../assets/fonts/Sansation.ttf
+Font    Arcade    	../assets/fonts/arcadeclassic.regular.ttf
+
+Music menuTheme     ../assets/Music/dp_frogger.flac
+Music gameTheme  ../assets/Music/dp_frogger_tweener.flac
+
+# Textures
+Texture Frog      ../assets/Textures/frogSprites.png
+Texture Street        ../assets/Textures/background.png
+
+#
+# SOUNDS
+Sound FroggerDie ../assets/Sounds/froggerDie.wav
+Sound FroggerMove ../assets/Sounds/froggerMove.wav
+
+# Sprites
+Sprite background       Street    1   1  480  600
+Sprite playerFrog       Frog      1   1  40   40
