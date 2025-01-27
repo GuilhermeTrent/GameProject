@@ -49,7 +49,12 @@ class GameProject : public Scene
     void                    adjustPlayerPosition();
     void                    init(const std::string& path);
     void                    loadLevel(const std::string& path);
+    void                    updateBarkText();
 
+private:
+    sf::Text _barkText;        // Text object to display the bark count
+    sf::Font _font;            // Font for the bark text
+    int _barkCounter = 2;      // Counter for the number of barks
 
 public:
     GameProject(GameEngine* gameEngine, const std::string& levelPath);

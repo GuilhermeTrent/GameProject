@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iostream>
 
+
 GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 	: Scene(gameEngine)
 	, _worldView(gameEngine->window().getDefaultView())
@@ -51,6 +52,8 @@ void GameProject::sUpdate(sf::Time dt)
 
 	sMovement(dt);
 	adjustPlayerPosition();
+	
+	
 
 }
 
@@ -102,6 +105,9 @@ void GameProject::registerActions()
 	registerAction(sf::Keyboard::Up, "UP");
 	registerAction(sf::Keyboard::S, "DOWN");
 	registerAction(sf::Keyboard::Down, "DOWN");
+
+	//Barking
+	registerAction(sf::Keyboard::E, "BARK");
 }
 
 void GameProject::spawnPlayer(sf::Vector2f pos)
@@ -171,8 +177,18 @@ void GameProject::init(const std::string& levelPath)
 
 	spawnPlayer(spawnPos);
 
+	//if (!_font.loadFromFile("assets/fonts/Arial.ttf")) { // Replace with your font path
+	//	throw std::runtime_error("Failed to load font!");
+	//}
+
 	MusicPlayer::getInstance().play("gameTheme");
 	MusicPlayer::getInstance().setVolume(5);
+
+	_barkText.setFont(_font);
+	_barkText.setCharacterSize(24);
+	_barkText.setFillColor(sf::Color::White);
+	_barkText.setPosition(10.f, 10.f); // Top-left corner
+	updateBarkText();
 }
 
 void GameProject::loadLevel(const std::string& path)
@@ -221,6 +237,13 @@ void GameProject::sDoAction(const Command& command)
 {
 	// On Key Press
 	if (command.type() == "START") {
+		if (command.name() == "BARK") {
+			if (_barkCounter > 0) {
+				//SoundPlayer::getInstance().play("barkSound"); // Play bark sound
+				_barkCounter--;                               // Decrease the counter
+				updateBarkText();                             // Update displayed text
+			}
+		}
 		if (command.name() == "PAUSE") { setPaused(!_isPaused); }
 		else if (command.name() == "QUIT") { _game->quitLevel(); }
 		else if (command.name() == "BACK") { _game->backLevel(); }
@@ -246,6 +269,13 @@ void GameProject::sDoAction(const Command& command)
 		else if (command.name() == "UP") { _player->getComponent<CInput>().up = false; }
 		else if (command.name() == "DOWN") { _player->getComponent<CInput>().down = false; }
 	}
+}
+
+void GameProject::updateBarkText()
+{
+	std::ostringstream oss;
+	oss << "Barks: " << _barkCounter;
+	_barkText.setString(oss.str());
 }
 
 void GameProject::sRender()
@@ -283,4 +313,6 @@ void GameProject::sRender()
 			_game->window().draw(rect);
 		}
 	}
+	// Draw bark counter
+	_game->window().draw(_barkText);
 }
