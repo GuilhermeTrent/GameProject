@@ -15,9 +15,9 @@ Texture Street        ../assets/Textures/background.png
 
 #
 # SOUNDS
-Sound FroggerDie ../assets/Sounds/froggerDie.wav
-Sound FroggerMove ../assets/Sounds/froggerMove.wav
-Sound PugBarks	../assets/Sounds/pipo_barks.wav
+Sound FroggerDie ../assets/Sound/froggerDie.wav
+Sound FroggerMove ../assets/Sound/froggerMove.wav
+Sound PugBarks	../assets/Sound/pipo_barks.wav
 
 # Sprites
 Sprite background       Street    1   1  480  600

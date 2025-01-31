@@ -237,7 +237,7 @@ void Assets::loadAnimationRecs(const std::string& path)
 void Assets::loadFromFile(const std::string path) {
     loadFonts(path);
     loadTextures(path);
-    //loadSounds(path);
+    loadSounds(path);
     loadSpriteRecs(path);
     loadAnimationRecs(path);
 }

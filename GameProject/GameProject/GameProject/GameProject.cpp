@@ -50,12 +50,36 @@ void GameProject::sUpdate(sf::Time dt)
 	SoundPlayer::getInstance().removeStoppedSounds();
 	_entityManager.update();
 
+	// Update bark counter text
+	_barkText.setString("Barks: " + std::to_string(_barkCounter));
+
+	// Keep text in the top-left even if the camera moves
+	_barkText.setPosition(
+		_worldView.getCenter().x - _worldView.getSize().x / 2.f + 10.f,
+		_worldView.getCenter().y - _worldView.getSize().y / 2.f + 10.f
+	);
+
 	sMovement(dt);
 	adjustPlayerPosition();
 	
 	
 
 }
+
+//void Scene_Planes::onBark()
+//{
+//    if (!canBark()) {
+//        std::cout << "No more barks left!" << std::endl;
+//        return;
+//    }
+//
+//    _barkCount--; // Decrease bark count
+//
+//    // Update text immediately so it refreshes before the next frame
+//    _barkText.setString("Barks: " + std::to_string(_barkCount));
+//
+//    std::cout << "Barked! Remaining: " << _barkCount << std::endl;
+//}
 
 void GameProject::onEnd()
 {
@@ -184,11 +208,27 @@ void GameProject::init(const std::string& levelPath)
 	MusicPlayer::getInstance().play("gameTheme");
 	MusicPlayer::getInstance().setVolume(5);
 
-	_barkText.setFont(_font);
-	_barkText.setCharacterSize(24);
-	_barkText.setFillColor(sf::Color::White);
-	_barkText.setPosition(10.f, 10.f); // Top-left corner
-	updateBarkText();
+	_barkText.setFont(Assets::getInstance().getFont("main"));
+	_barkText.setPosition(15.f, 25.f);
+	_barkText.setCharacterSize(15);
+	// Load the font for the bark counter
+	/*if (!_barkFont.loadFromFile("assets/fonts/Arcade.ttf")) {
+		std::cerr << "Error loading font for bark counter!" << std::endl;
+	}*/
+
+	// Set up the bark counter text
+	//_barkText.setFont(_barkFont);
+	//_barkText.setCharacterSize(24);
+	//_barkText.setFillColor(sf::Color::White);
+	//_barkText.setStyle(sf::Text::Bold);
+	//_barkText.setString("Barks: " + std::to_string(_barkCounter)); // Start with 2 barks
+	//_barkText.setPosition(10.f, 10.f);
+
+	//_barkText.setFont(_font);
+	//_barkText.setCharacterSize(24);
+	//_barkText.setFillColor(sf::Color::White);
+	//_barkText.setPosition(10.f, 10.f); // Top-left corner
+	//updateBarkText();
 }
 
 void GameProject::loadLevel(const std::string& path)
@@ -239,9 +279,11 @@ void GameProject::sDoAction(const Command& command)
 	if (command.type() == "START") {
 		if (command.name() == "BARK") {
 			if (_barkCounter > 0) {
-				//SoundPlayer::getInstance().play("barkSound"); // Play bark sound
-				_barkCounter--;                               // Decrease the counter
-				updateBarkText();                             // Update displayed text
+				SoundPlayer::getInstance().play("PugBarks"); 
+				_barkCounter-= 1;
+				_barkText.setString("Barks: " + std::to_string(_barkCounter));
+				//_barkCounter--;                               // Decrease the counter
+				//updateBarkText();                             // Update displayed text
 			}
 		}
 		if (command.name() == "PAUSE") { setPaused(!_isPaused); }
@@ -271,12 +313,12 @@ void GameProject::sDoAction(const Command& command)
 	}
 }
 
-void GameProject::updateBarkText()
-{
-	std::ostringstream oss;
-	oss << "Barks: " << _barkCounter;
-	_barkText.setString(oss.str());
-}
+//void GameProject::updateBarkText()
+//{
+//	std::ostringstream oss;
+//	oss << "Barks: " << _barkCounter;
+//	_barkText.setString(oss.str());
+//}
 
 void GameProject::sRender()
 {
@@ -300,6 +342,12 @@ void GameProject::sRender()
 		sprite.setPosition(tfm.pos);
 		sprite.setRotation(tfm.angle);
 		_game->window().draw(sprite);
+		_barkText.setString("Barks: " + std::to_string(_barkCounter));
+		_barkText.setPosition(
+			_game->window().getSize().x - _barkText.getLocalBounds().width - 10,
+			10
+		);
+		_game->window().draw(_barkText);
 
 		if (_drawAABB && e->hasComponent<CBoundingBox>()) {
 			auto box = e->getComponent<CBoundingBox>();
@@ -313,6 +361,9 @@ void GameProject::sRender()
 			_game->window().draw(rect);
 		}
 	}
+	/*_barkText.setPosition(5.0f, -5.0f);
+	_barkText.setString("Barks  " + std::to_string(_barkCounter));
+	_game->window().draw(_barkText);*/
 	// Draw bark counter
-	_game->window().draw(_barkText);
+	//_game->window().draw(_barkText);
 }

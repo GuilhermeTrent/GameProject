@@ -22,6 +22,9 @@ class GameProject : public Scene
     sPtrEntt                        _player{ nullptr };
     sf::View                        _worldView;
     sf::FloatRect                   _worldBounds;
+    int                             _barkCounter{ 2 };
+    sf::Text                        _barkText;
+
 
     LevelConfig                     _config;
 
@@ -35,6 +38,7 @@ class GameProject : public Scene
     void                    sUpdate(sf::Time dt);
     void	                onEnd() override;
     void                    sSpawnEnemies();
+    void                    onBark();
 
     // helper functions
     void                    startAnimation(sPtrEntt e, std::string animation);
@@ -51,10 +55,12 @@ class GameProject : public Scene
     void                    loadLevel(const std::string& path);
     void                    updateBarkText();
 
-private:
-    sf::Text _barkText;        // Text object to display the bark count
-    sf::Font _font;            // Font for the bark text
-    int _barkCounter = 2;      // Counter for the number of barks
+//private:
+//    sf::Text _barkText;        
+//    sf::Font _barkFont;           
+//    int _barkCounter = 2;   
+//
+    bool canBark() const { return _barkCounter > 0; }
 
 public:
     GameProject(GameEngine* gameEngine, const std::string& levelPath);
@@ -62,5 +68,11 @@ public:
     void		            update(sf::Time dt) override;
     void		            sDoAction(const Command& command) override;
     void		            sRender() override;
+
+   /* sf::Text _barkText;
+    sf::Font _barkFont;
+    int _barkCounter = 2;
+
+    bool canBark() const { return _barkCounter > 0; }*/
 };
 
