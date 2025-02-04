@@ -10,6 +10,7 @@
 #include <random>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 
 GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
@@ -61,6 +62,19 @@ void GameProject::sUpdate(sf::Time dt)
 
 	sMovement(dt);
 	adjustPlayerPosition();
+	if (m_countdownTime > 0.0f)
+	{
+		m_countdownTime -= dt.asSeconds(); // Convert sf::Time to float
+		if (m_countdownTime <= 0.0f)
+		{
+			m_timerActive = true; // Start the race timer
+			m_countdownTime = 0.0f;
+		}
+	}
+	else if (m_timerActive)
+	{
+		m_raceTime += dt.asSeconds(); // Convert sf::Time to float
+	}
 	
 	
 
@@ -211,6 +225,14 @@ void GameProject::init(const std::string& levelPath)
 	_barkText.setFont(Assets::getInstance().getFont("main"));
 	_barkText.setPosition(15.f, 25.f);
 	_barkText.setCharacterSize(15);
+
+	m_countdownTime = 3.0f;
+	m_raceTime = 0.0f;
+	m_timerActive = false;
+
+
+
+	//m_game->soundPlayer().play("countdown");
 	// Load the font for the bark counter
 	/*if (!_barkFont.loadFromFile("assets/fonts/Arcade.ttf")) {
 		std::cerr << "Error loading font for bark counter!" << std::endl;
@@ -360,6 +382,37 @@ void GameProject::sRender()
 			rect.setOutlineThickness(2.f);
 			_game->window().draw(rect);
 		}
+
+		//; >assets().getFont("Arcade");
+		sf::Text timerText;
+		timerText.setFont(Assets::getInstance().getFont("main"));
+		timerText.setCharacterSize(50);
+		timerText.setFillColor(sf::Color::White);
+		timerText.setPosition(_game->window().getSize().x / 2 - 50, 50);
+		// Format time as MM:SS.mmm (minutes, seconds, milliseconds)
+		int minutes = static_cast<int>(m_raceTime) / 60;
+		int seconds = static_cast<int>(m_raceTime) % 60;
+		int milliseconds = static_cast<int>((m_raceTime - static_cast<int>(m_raceTime)) * 1000);
+
+		
+		std::ostringstream timeStream;
+		timeStream << std::setfill('0') << std::setw(2) << minutes << ":"
+			<< std::setw(2) << seconds << "."
+			<< std::setw(3) << milliseconds;
+
+		
+
+		if (m_countdownTime > 0.0f)
+		{
+			timerText.setString(std::to_string(static_cast<int>(ceil(m_countdownTime))));
+		}
+		else
+		{
+			timerText.setString("Time: " + std::to_string(static_cast<int>(m_raceTime)));
+		}
+		timerText.setString(timeStream.str()); // Update the text display
+
+		_game->window().draw(timerText);
 	}
 	/*_barkText.setPosition(5.0f, -5.0f);
 	_barkText.setString("Barks  " + std::to_string(_barkCounter));

@@ -19,6 +19,7 @@ struct LevelConfig {
 
 class GameProject : public Scene
 {
+    GameEngine*                      m_game;
     sPtrEntt                        _player{ nullptr };
     sf::View                        _worldView;
     sf::FloatRect                   _worldBounds;
@@ -54,6 +55,12 @@ class GameProject : public Scene
     void                    init(const std::string& path);
     void                    loadLevel(const std::string& path);
     void                    updateBarkText();
+
+    float m_countdownTime = 3.0f; // Countdown before race starts
+    float m_raceTime = 0.0f;      // Race time after countdown
+    bool m_timerActive = false;   // Track when the race is ongoing
+
+    sf::Text _timerText;
 
 //private:
 //    sf::Text _barkText;        
