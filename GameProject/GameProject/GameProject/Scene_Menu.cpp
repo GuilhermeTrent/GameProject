@@ -34,7 +34,7 @@ void Scene_Menu::init()
 	m_menuStrings.push_back("Level 3");
 
 	m_levelPaths.push_back("../level1.txt");
-	m_levelPaths.push_back("../level1.txt");
+	m_levelPaths.push_back("../level2.txt");
 	m_levelPaths.push_back("../level1.txt");
 
 	m_menuText.setFont(Assets::getInstance().getFont("Arcade"));

@@ -1,6 +1,6 @@
 # Game Config
 
-Window  480 600
+Window  720 480
  
 Font    Arial      	../assets/fonts/arial.ttf
 Font    main       	../assets/fonts/Sansation.ttf
@@ -11,7 +11,8 @@ Music gameTheme  ../assets/Music/dp_frogger_tweener.flac
 
 # Textures
 Texture Frog      ../assets/Textures/frogSprites.png
-Texture Street        ../assets/Textures/background.png
+Texture Street        ../assets/Textures/park_test.png
+Texture Beach        ../assets/Textures/beach.png
 
 #
 # SOUNDS
@@ -20,5 +21,5 @@ Sound FroggerMove ../assets/Sound/froggerMove.wav
 Sound PugBarks	../assets/Sound/pipo_barks.wav
 
 # Sprites
-Sprite background       Street    1   1  480  600
+Sprite background       Street    1   1  720  480
 Sprite playerFrog       Frog      1   1  40   40
