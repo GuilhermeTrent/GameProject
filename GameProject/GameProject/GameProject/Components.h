@@ -87,6 +87,8 @@ struct CAnimation : public Component
 
     CAnimation() = default;
 
+    
+
     inline bool    isFinished() {
         return (!isRepeat && currentFrame >= numbFrames);
     }

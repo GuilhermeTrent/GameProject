@@ -42,7 +42,10 @@ class GameProject : public Scene
     void                    onBark();
 
     // helper functions
-    void                    startAnimation(sPtrEntt e, std::string animation);
+    void spawnBarrels();
+void checkBarkCollision();
+void startAnimation(sPtrEntt e, std::string animation);
+   // void                    startAnimation(sPtrEntt e, std::string animation);
     void                    checkIfDead(sPtrEntt e);
     void                    checkPlayerCollision();
     void                    destroyOutsideWindow();
@@ -61,6 +64,8 @@ class GameProject : public Scene
     bool m_timerActive = false;   // Track when the race is ongoing
 
     sf::Text _timerText;
+    sf::Text m_countdownText;
+    //std::shared_ptr<Entity> _backgroundEntity;
 
 //private:
 //    sf::Text _barkText;        

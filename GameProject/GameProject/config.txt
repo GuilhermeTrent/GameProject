@@ -1,6 +1,6 @@
 # Game Config
 
-Window  720 480
+Window  1024 768
  
 Font    Arial      	../assets/fonts/arial.ttf
 Font    main       	../assets/fonts/Sansation.ttf
@@ -10,16 +10,37 @@ Music menuTheme     ../assets/Music/dp_frogger.flac
 Music gameTheme  ../assets/Music/dp_frogger_tweener.flac
 
 # Textures
-Texture Frog      ../assets/Textures/frogSprites.png
-Texture Street        ../assets/Textures/park_test.png
-Texture Beach        ../assets/Textures/beach.png
+Texture Pug      ../assets/Textures/pug_testing.png
+Texture Park     ../assets/Textures/park_test.png
+Texture Beach    ../assets/Textures/beach.png
+Texture Barrel   ../assets/Textures/barrel.png
+Texture PugDown  ../assets/Textures/pug_down.png
+Texture PugUp    ../assets/Textures/pug_up.png
+Texture PugLeft  ../assets/Textures/pug_left.png
+Texture PugRight ../assets/Textures/pug_right.png
 
 #
 # SOUNDS
 Sound FroggerDie ../assets/Sound/froggerDie.wav
 Sound FroggerMove ../assets/Sound/froggerMove.wav
 Sound PugBarks	../assets/Sound/pipo_barks.wav
+Sound Explosion1    ../assets/Sound/Explosion1.wav
+Sound Explosion2    ../assets/Sound/Explosion2.wav
 
 # Sprites
-Sprite background       Street    1   1  720  480
-Sprite playerFrog       Frog      1   1  40   40
+Sprite background      Park    1   1  1024  768
+Sprite playerPug       Pug      1   1  30   30
+
+#
+#  Animation    Name            Texture     Speed   Repeats
+
+Animation       explosion       Entities    20       no
+
+Animation       PugLeft        pug_left.png    1        yes
+Animation       PugRight        pug_right.png     1        yes
+Animation       PugDown        pug_down.png     1        yes
+Animation       PugUp        pug_up.png     1        yes
+
+
+
+

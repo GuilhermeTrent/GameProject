@@ -12,6 +12,7 @@
 #include <iostream>
 #include <iomanip>
 
+std::mt19937 rng{ std::random_device{}() };
 
 GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 	: Scene(gameEngine)
@@ -64,16 +65,18 @@ void GameProject::sUpdate(sf::Time dt)
 	adjustPlayerPosition();
 	if (m_countdownTime > 0.0f)
 	{
-		m_countdownTime -= dt.asSeconds(); // Convert sf::Time to float
-		if (m_countdownTime <= 0.0f)
+		m_countdownTime -= dt.asSeconds();
+		if (m_countdownTime < 0.0f)
 		{
-			m_timerActive = true; // Start the race timer
 			m_countdownTime = 0.0f;
+			m_timerActive = true; // Start the race timer
 		}
+		m_countdownText.setString(std::to_string(static_cast<int>(std::ceil(m_countdownTime)))); // Update text
 	}
 	else if (m_timerActive)
 	{
-		m_raceTime += dt.asSeconds(); // Convert sf::Time to float
+		m_raceTime += dt.asSeconds();
+		m_countdownText.setString(""); // Hide text when race starts
 	}
 	
 	
@@ -103,9 +106,7 @@ void GameProject::sSpawnEnemies()
 {
 }
 
-void GameProject::startAnimation(sPtrEntt e, std::string animation)
-{
-}
+
 
 void GameProject::checkIfDead(sPtrEntt e)
 {
@@ -153,7 +154,7 @@ void GameProject::spawnPlayer(sf::Vector2f pos)
 	_player = _entityManager.addEntity("player");
 	_player->addComponent<CTransform>(pos);
 
-	auto& sr = Assets::getInstance().getSpriteRec("playerFrog");
+	auto& sr = Assets::getInstance().getSpriteRec("playerPug");
 	auto& sprite = _player->addComponent<CSprite>(Assets::getInstance().getTexture(sr.texName)).sprite;
 	sprite.setTextureRect(sr.texRect);
 	centerOrigin(sprite);
@@ -178,6 +179,20 @@ void GameProject::playerMovement()
 
 void GameProject::annimatePlayer()
 {
+	
+
+	//auto pv = _player->getComponent<CTransform>().vel;
+	//// implement roll animation, set texture rec accordingly
+	//if (pv.x < -0.1)
+	//	_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PugLeft"));
+	//else if (pv.x > 0.1)
+	//	_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PugRight"));
+	//else if (pv.y > -0.1)
+	//	_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PugDown"));
+	//else if (pv.y > 0.1)
+	//	_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PugUp"));
+	//else
+	//	_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PugIdle"));
 }
 
 void GameProject::adjustPlayerPosition()
@@ -251,6 +266,13 @@ void GameProject::init(const std::string& levelPath)
 	//_barkText.setFillColor(sf::Color::White);
 	//_barkText.setPosition(10.f, 10.f); // Top-left corner
 	//updateBarkText();
+	
+	m_countdownText.setFont(Assets::getInstance().getFont("main"));
+	m_countdownText.setCharacterSize(30);
+	m_countdownText.setFillColor(sf::Color::Red);
+	m_countdownText.setPosition(_worldView.getSize().x / 2.f - 20.f, _worldView.getSize().y / 2.f - 20.f);
+	m_countdownText.setString(std::to_string(static_cast<int>(m_countdownTime))); // Initial display
+	
 }
 
 void GameProject::loadLevel(const std::string& path)
@@ -264,19 +286,22 @@ void GameProject::loadLevel(const std::string& path)
 	}
 
 	std::string token{ "" };
+
+	
 	config >> token;
 	while (!config.eof()) {
 		if (token == "Bkg") {
 			std::string name;
 			sf::Vector2f pos;
 			config >> name >> pos.x >> pos.y;
-			auto e = _entityManager.addEntity("bkg");
 
-			// for background, no textureRect its just the whole texture
-			// and no center origin, position by top left corner
-			auto& sprite = e->addComponent<CSprite>(Assets::getInstance().getTexture(name)).sprite;
-			sprite.setOrigin(0.f, 0.f);
-			sprite.setPosition(pos);
+		auto e = _entityManager.addEntity("bkg");
+
+		// for background, no textureRect its just the whole texture
+		// and no center origin, position by top left corner
+		auto& sprite = e->addComponent<CSprite>(Assets::getInstance().getTexture(name)).sprite;
+		sprite.setOrigin(0.f, 0.f);
+		sprite.setPosition(pos);
 		}
 		else if (token == "World") {
 			config >> _worldBounds.width >> _worldBounds.height;
@@ -340,6 +365,39 @@ void GameProject::sDoAction(const Command& command)
 //	std::ostringstream oss;
 //	oss << "Barks: " << _barkCounter;
 //	_barkText.setString(oss.str());
+//}
+
+//void GameProject::spawnBarrels() {
+//	
+//	std::uniform_real_distribution<float> xPos(50, 750);
+//	std::uniform_real_distribution<float> yPos(50, 550);
+//
+//	for (int i = 0; i < 4; i++) {
+//		auto barrel = _entityManager.addEntity("Barrel");
+//		barrel->addComponent<CTransform>(sf::Vector2f(xPos(rng), yPos(rng)));
+//		auto anim = Assets::getInstance().getAnimation("barrel");
+//		barrel->addComponent<CAnimation>(anim);
+//		barrel->addComponent<CBoundingBox>(sf::IntRect(0, 0, anim.frameSize.x, anim.frameSize.y));
+//	}
+//	
+//}
+//
+//void GameProject::checkBarkCollision() {
+//	for (auto barrel : _entityManager.getEntities("Barrel")) {
+//		auto overlap = Physics::getOverlap(_player, barrel);
+//		if (overlap.x > 0 && overlap.y > 0) {
+//			startAnimation(barrel, "explosion");
+//			barrel->destroy();
+//			SoundPlayer::getInstance().play("Explosion1", barrel->getComponent<CTransform>().pos);
+//		}
+//	}
+//}
+//
+//void GameProject::startAnimation(sPtrEntt e, std::string animation) {
+//	e->addComponent<CAnimation>(Assets::getInstance().getAnimation(animation));
+//	e->getComponent<CTransform>().vel = sf::Vector2f(0, 0);
+//	e->removeComponent<CBoundingBox>();
+//	e->addComponent<CState>().state = "Exploding";
 //}
 
 void GameProject::sRender()
@@ -410,9 +468,10 @@ void GameProject::sRender()
 		{
 			timerText.setString("Time: " + std::to_string(static_cast<int>(m_raceTime)));
 		}
-		timerText.setString(timeStream.str()); // Update the text display
+		timerText.setString(timeStream.str()); 
 
 		_game->window().draw(timerText);
+		_game->window().draw(m_countdownText);
 	}
 	/*_barkText.setPosition(5.0f, -5.0f);
 	_barkText.setString("Barks  " + std::to_string(_barkCounter));

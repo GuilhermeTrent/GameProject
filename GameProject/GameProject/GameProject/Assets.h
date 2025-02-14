@@ -9,6 +9,7 @@
 #include <SFML/Audio.hpp>
 
 #include <map>
+#include "Animation.h"
 
 struct AnimationRec {
     std::string     texName;
@@ -45,6 +46,7 @@ private:
     std::map<std::string, std::unique_ptr<sf::SoundBuffer>>     _soundEffects;
     std::map<std::string, sf::Texture>                          _textures;
     std::map<std::string, SpriteRec>                            _spriteRecs;
+    std::map<std::string, Animation>                            _animationMap;
     std::map<std::string, AnimationRec>                         _animationRecs;
 
 
@@ -68,6 +70,7 @@ public:
     const sf::Font& getFont(const std::string& fontName) const;
     const sf::SoundBuffer& getSound(const std::string& fontName) const;
     const sf::Texture& getTexture(const std::string& textureName) const;
+    const Animation& getAnimation(const std::string& name) const;
     const SpriteRec& getSpriteRec(const std::string& name) const;
     const AnimationRec& getAnimationRec(const std::string& name) const;
 

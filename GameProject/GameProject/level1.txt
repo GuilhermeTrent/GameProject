@@ -1,9 +1,9 @@
 # Level 1
 
-World 720 480
+World 1024 768
 
 PlayerSpeed 100
 
-Bkg Street 0 0
+Bkg Park 0 0
 
 

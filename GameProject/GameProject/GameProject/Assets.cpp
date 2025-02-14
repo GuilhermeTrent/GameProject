@@ -92,6 +92,8 @@ const AnimationRec& Assets::getAnimationRec(const std::string& name) const
     return _animationRecs.at(name);
 }
 
+
+
 void Assets::loadFonts(const std::string& path)
 {
     std::ifstream confFile(path);
