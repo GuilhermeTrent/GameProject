@@ -154,13 +154,9 @@ void GameProject::spawnPlayer(sf::Vector2f pos)
 	_player = _entityManager.addEntity("player");
 	_player->addComponent<CTransform>(pos);
 
-	auto& sr = Assets::getInstance().getSpriteRec("playerPug");
-	auto& sprite = _player->addComponent<CSprite>(Assets::getInstance().getTexture(sr.texName)).sprite;
-	sprite.setTextureRect(sr.texRect);
-	centerOrigin(sprite);
-
-	_player->addComponent<CBoundingBox>(sf::Vector2f{ 35.f,33.f });
-	_player->addComponent<CState>("straight");
+	auto bb = _player->addComponent<CAnimation>(Assets::getInstance().getAnimation("pug_left")).animation.getBB();
+	_player->addComponent<CBoundingBox>(bb);
+	_player->addComponent<CState>("straight"); // ?
 	_player->addComponent<CInput>();
 }
 
@@ -412,34 +408,15 @@ void GameProject::sRender()
 		}
 	}
 
+	// draw all remaining entities
 	for (auto& e : _entityManager.getEntities()) {
-		if (!e->hasComponent<CSprite>() || e->getTag() == "bkg")
+		if (!e->hasComponent<CAnimation>() || e->getTag() == "bkg")
 			continue;
 
-		// Draw Sprite
-		auto& sprite = e->getComponent<CSprite>().sprite;
-		auto& tfm = e->getComponent<CTransform>();
-		sprite.setPosition(tfm.pos);
-		sprite.setRotation(tfm.angle);
-		_game->window().draw(sprite);
-		_barkText.setString("Barks: " + std::to_string(_barkCounter));
-		_barkText.setPosition(
-			_game->window().getSize().x - _barkText.getLocalBounds().width - 10,
-			10
-		);
-		_game->window().draw(_barkText);
+		drawEntt(e);
 
-		if (_drawAABB && e->hasComponent<CBoundingBox>()) {
-			auto box = e->getComponent<CBoundingBox>();
-			sf::RectangleShape rect;
-			rect.setSize(sf::Vector2f{ box.size.x, box.size.y });
-			centerOrigin(rect);
-			rect.setPosition(e->getComponent<CTransform>().pos);
-			rect.setFillColor(sf::Color(0, 0, 0, 0));
-			rect.setOutlineColor(sf::Color{ 0, 255, 0 });
-			rect.setOutlineThickness(2.f);
-			_game->window().draw(rect);
-		}
+
+		drawAABB(e);
 
 		//; >assets().getFont("Arcade");
 		sf::Text timerText;
@@ -478,4 +455,30 @@ void GameProject::sRender()
 	_game->window().draw(_barkText);*/
 	// Draw bark counter
 	//_game->window().draw(_barkText);
+}
+
+void GameProject::drawAABB(sPtrEntt& e)
+{
+	// Draw AABB
+	if (_drawAABB && e->hasComponent<CBoundingBox>()) {
+		auto box = e->getComponent<CBoundingBox>();
+		sf::RectangleShape rect;
+		rect.setSize(sf::Vector2f{ box.size.x, box.size.y });
+		centerOrigin(rect);
+		rect.setPosition(e->getComponent<CTransform>().pos);
+		rect.setFillColor(sf::Color(0, 0, 0, 0));
+		rect.setOutlineColor(sf::Color{ 0, 255, 0 });
+		rect.setOutlineThickness(2.f);
+		_game->window().draw(rect);
+	}
+}
+
+void GameProject::drawEntt(sPtrEntt& e)
+{
+	// Draw Sprite
+	auto& anim = e->getComponent<CAnimation>().animation;
+	auto& tfm = e->getComponent<CTransform>();
+	anim.getSprite().setPosition(tfm.pos);
+	anim.getSprite().setRotation(tfm.angle);
+	_game->window().draw(anim.getSprite());
 }

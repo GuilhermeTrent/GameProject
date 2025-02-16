@@ -81,6 +81,10 @@ public:
     void		            sDoAction(const Command& command) override;
     void		            sRender() override;
 
+    void drawAABB(sPtrEntt& e);
+
+    void drawEntt(sPtrEntt& e);
+
    /* sf::Text _barkText;
     sf::Font _barkFont;
     int _barkCounter = 2;

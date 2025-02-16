@@ -9,7 +9,10 @@ Font    Arcade    	../assets/fonts/arcadeclassic.regular.ttf
 Music menuTheme     ../assets/Music/dp_frogger.flac
 Music gameTheme  ../assets/Music/dp_frogger_tweener.flac
 
+JSON 			 ../assets/Textures/Entities.json
+
 # Textures
+Texture Entities ../assets/Textures/Entities.png
 Texture Pug      ../assets/Textures/pug_testing.png
 Texture Park     ../assets/Textures/park_test.png
 Texture Beach    ../assets/Textures/beach.png
@@ -32,15 +35,11 @@ Sprite background      Park    1   1  1024  768
 Sprite playerPug       Pug      1   1  30   30
 
 #
-#  Animation    Name            Texture     Speed   Repeats
+#  Animation    Name            Texture       Speed   Repeats
 
-Animation       explosion       Entities    20       no
+Animation       explosion       Entities    	20       no
 
-Animation       PugLeft        pug_left.png    1        yes
-Animation       PugRight        pug_right.png     1        yes
-Animation       PugDown        pug_down.png     1        yes
-Animation       PugUp        pug_up.png     1        yes
-
-
-
-
+Animation       pug_left        Entities    	1        yes
+Animation       pug_right       Entities    	1        yes
+Animation       pug_down        Entities    	1        yes
+Animation		pug_up			Entities		1		 yes

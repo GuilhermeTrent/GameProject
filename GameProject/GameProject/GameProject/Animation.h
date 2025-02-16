@@ -1,3 +1,6 @@
+//
+// Created by David Burchill on 2024-11-26.
+// 
 #pragma once
 
 #include <SFML/Graphics.hpp>
@@ -23,8 +26,9 @@ public:
 
     void                    update(sf::Time dt);
     bool                    hasEnded() const;
-    const std::string&      getName() const;
-    sf::Sprite&             getSprite();
+    const std::string& getName() const;
+    sf::Sprite& getSprite();
     sf::Vector2f            getBB() const;
 };
 
+ 

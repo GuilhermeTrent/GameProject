@@ -1,5 +1,10 @@
+//
+// Created by David Burchill on 2024-11-26.
+//
+
 #include "Animation.h"
 #include "Utilities.h"
+
 
 Animation::Animation(const std::string& name,
     const sf::Texture& t,

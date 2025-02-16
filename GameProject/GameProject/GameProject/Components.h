@@ -9,6 +9,7 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include "Utilities.h"
+#include "Animation.h"
 
 
 struct Component
@@ -78,20 +79,10 @@ struct CCollision : public Component
 
 struct CAnimation : public Component
 {
-    sf::Vector2i    frameSize{ 0,0 };
-    size_t          numbFrames{ 1 };
-    size_t          currentFrame{ 0 };
-    sf::Time        timePerFrame{ sf::Time::Zero };
-    sf::Time        countDown{ sf::Time::Zero };
-    bool            isRepeat{ true };
+    Animation   animation;
 
     CAnimation() = default;
-
-    
-
-    inline bool    isFinished() {
-        return (!isRepeat && currentFrame >= numbFrames);
-    }
+    CAnimation(const Animation& a) : animation(a) {}
 };
 
 

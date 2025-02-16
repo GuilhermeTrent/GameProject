@@ -1,15 +1,18 @@
 //
 // Created by David Burchill on 2023-10-31.
 //
+#pragma once
 
-#ifndef BREAKOUT_ASSETS_H
-#define BREAKOUT_ASSETS_H
+#include  "Animation.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
-
 #include <map>
-#include "Animation.h"
+
+struct SpriteRec {
+    std::string texName;
+    sf::IntRect texRect;
+};
 
 struct AnimationRec {
     std::string     texName;
@@ -18,12 +21,6 @@ struct AnimationRec {
     sf::Time        duration;
     bool            repeat;
 };
-
-struct SpriteRec {
-    std::string     texName;
-    sf::IntRect     texRect;
-};
-
 
 class Assets {
 
@@ -45,17 +42,16 @@ private:
     std::map<std::string, std::unique_ptr<sf::Font>>            _fontMap;
     std::map<std::string, std::unique_ptr<sf::SoundBuffer>>     _soundEffects;
     std::map<std::string, sf::Texture>                          _textures;
-    std::map<std::string, SpriteRec>                            _spriteRecs;
     std::map<std::string, Animation>                            _animationMap;
-    std::map<std::string, AnimationRec>                         _animationRecs;
-
+    std::map<std::string, std::vector<sf::IntRect>>             _frameSets;
 
     void loadFonts(const std::string& path);
     void loadTextures(const std::string& path);
     void loadSounds(const std::string& path);
+    void loadJson(const std::string& path);
+    void loadAnimations(const std::string& path);
     void loadSpriteRecs(const std::string& path);
     void loadAnimationRecs(const std::string& path);
-
 
 public:
     void loadFromFile(const std::string path);
@@ -66,15 +62,9 @@ public:
     void addSpriteRec(const std::string& name, SpriteRec sr);
     void addAnimationRec(const std::string& name, AnimationRec ar);
 
-
     const sf::Font& getFont(const std::string& fontName) const;
     const sf::SoundBuffer& getSound(const std::string& fontName) const;
     const sf::Texture& getTexture(const std::string& textureName) const;
     const Animation& getAnimation(const std::string& name) const;
-    const SpriteRec& getSpriteRec(const std::string& name) const;
-    const AnimationRec& getAnimationRec(const std::string& name) const;
-
+    const AnimationRec& getAnimationRec(const std::string name) const;
 };
-
-
-#endif //BREAKOUT_ASSETS_H
