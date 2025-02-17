@@ -18,6 +18,9 @@ Texture PugDown  ../assets/Textures/pug_down.png
 Texture PugUp    ../assets/Textures/pug_up.png
 Texture PugLeft  ../assets/Textures/pug_left.png
 Texture PugRight ../assets/Textures/pug_right.png
+Texture Bone     ../assets/Textures/bone.png
+Texture PR_Fart ../assets/Textures/pug_right_farting.png
+
 
 #
 # SOUNDS
@@ -26,20 +29,23 @@ Sound FroggerMove ../assets/Sound/froggerMove.wav
 Sound PugBarks	../assets/Sound/pipo_barks.wav
 Sound Explosion1    ../assets/Sound/Explosion1.wav
 Sound Explosion2    ../assets/Sound/Explosion2.wav
+Sound Fart          ../assets/Sound/fart.wav
 
 # Sprites
 Sprite background      Park    1   1  1024  768
 Sprite playerPug       Pug      1   1  30   30
+Sprite  PugDown        PugDown  1   1  30   30
+Sprite PugUp          PugUp    1   1  30   30
+Sprite PugLeft        PugLeft  1   1  30   30
+Sprite PugRight       PugRight 1   1  30   30
+Sprite Barrel         Barrel   1   1   30   30
+Sprite Bone		Bone   1   1   30   30
+Sprite PR_Fart		PR_Fart   1   1   40  40 
 
 #
 #  Animation    Name            Texture     Speed   Repeats
 
-Animation       explosion       Entities    20       no
 
-Animation       PugLeft        pug_left.png    1        yes
-Animation       PugRight        pug_right.png     1        yes
-Animation       PugDown        pug_down.png     1        yes
-Animation       PugUp        pug_up.png     1        yes
 
 
 

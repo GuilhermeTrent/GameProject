@@ -24,6 +24,17 @@ GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 
 void GameProject::sAnimation(sf::Time dt)
 {
+	//for (auto e : _entityManager.getEntities()) {
+	//	// update all animations
+	//	if (e->getComponent<CAnimation>().has) {
+	//		auto& anim = e->getComponent<CAnimation>();
+	//		anim.animation.update(dt);
+
+	//		if (anim.animation.hasEnded()) { // for explosion
+	//			e->destroy();
+	//		}
+	//	}
+	//}
 }
 
 void GameProject::sMovement(sf::Time dt)
@@ -69,17 +80,71 @@ void GameProject::sUpdate(sf::Time dt)
 		if (m_countdownTime < 0.0f)
 		{
 			m_countdownTime = 0.0f;
-			m_timerActive = true; // Start the race timer
+			m_timerActive = true; 
 		}
 		m_countdownText.setString(std::to_string(static_cast<int>(std::ceil(m_countdownTime)))); // Update text
 	}
 	else if (m_timerActive)
 	{
 		m_raceTime += dt.asSeconds();
-		m_countdownText.setString(""); // Hide text when race starts
+		m_countdownText.setString(""); 
 	}
+	annimatePlayer();
 	
+	spawnBarrel();
+
+	spawnBone();
+
+
+	if (!_player) return; // Ensure _player exists
+
+	auto& playerTransform = _player->getComponent<CTransform>();
+	auto& playerSprite = _player->getComponent<CSprite>();
+
+	for (auto& bone : _bones)
+	{
+		if (!bone->isActive()) continue;
+
+		auto& boneTransform = bone->getComponent<CTransform>();
+
+		float distance = std::hypot(playerTransform.pos.x - boneTransform.pos.x,
+			playerTransform.pos.y - boneTransform.pos.y);
+
+		if (distance < 50.0f) // Pickup range threshold
+		{
+			bone->destroy(); // Remove the bone
+			SoundPlayer::getInstance().play("Fart"); // Play fart sound
+
+			// Boost player speed for 2 seconds
+			_playerSpeedBoost = true;
+			_speedBoostTimer = 2.0f;
+			playerTransform.vel.x += (playerTransform.vel.x >= 0) ? 100.0f : -100.0f;
+			playerTransform.vel.y += (playerTransform.vel.y >= 0) ? 50.0f : -50.0f;
+
+			// Change texture if moving to the right
+			if (playerTransform.vel.x > 0)
+			{
+				playerSprite.sprite.setTexture(Assets::getInstance().getTexture("PR_Fart"));
+			}
+		}
+	}
+
+	// Handle speed boost duration
+	if (_playerSpeedBoost)
+	{
+		_speedBoostTimer -= _deltaTime;
+		if (_speedBoostTimer <= 0.0f)
+		{
+			_playerSpeedBoost = false;
+			playerTransform.vel = sf::Vector2f(0.0f, 0.0f); // Reset speed
+
+			// Reset texture to default after farting ends
+			playerSprite.sprite.setTexture(Assets::getInstance().getTexture("PugRight"));
+		}
+	}
+
 	
+	//handleBarking();
 
 }
 
@@ -181,18 +246,104 @@ void GameProject::annimatePlayer()
 {
 	
 
-	//auto pv = _player->getComponent<CTransform>().vel;
-	//// implement roll animation, set texture rec accordingly
-	//if (pv.x < -0.1)
-	//	_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PugLeft"));
-	//else if (pv.x > 0.1)
-	//	_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PugRight"));
-	//else if (pv.y > -0.1)
-	//	_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PugDown"));
-	//else if (pv.y > 0.1)
-	//	_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PugUp"));
-	//else
-	//	_player->addComponent<CAnimation>(Assets::getInstance().getAnimation("PugIdle"));
+	auto& playerSprite = _player->getComponent<CSprite>().sprite;
+	auto& playerState = _player->getComponent<CState>().state;
+	auto playerVel = _player->getComponent<CTransform>().vel;
+
+	if (playerVel.x < -0.1f)
+	{
+		playerState = "left";
+		auto& sr = Assets::getInstance().getSpriteRec("PugLeft");
+		playerSprite.setTexture(Assets::getInstance().getTexture(sr.texName));
+		playerSprite.setTextureRect(sr.texRect);
+	}
+	else if (playerVel.x > 0.1f)
+	{
+		playerState = "right";
+		auto& sr = Assets::getInstance().getSpriteRec("PugRight");
+		playerSprite.setTexture(Assets::getInstance().getTexture(sr.texName));
+		playerSprite.setTextureRect(sr.texRect);
+	}
+	else if (playerVel.y < -0.1f)
+	{
+		playerState = "up";
+		auto& sr = Assets::getInstance().getSpriteRec("PugUp");
+		playerSprite.setTexture(Assets::getInstance().getTexture(sr.texName));
+		playerSprite.setTextureRect(sr.texRect);
+	}
+	else if (playerVel.y > 0.1f)
+	{
+		playerState = "down";
+		auto& sr = Assets::getInstance().getSpriteRec("PugDown");
+		playerSprite.setTexture(Assets::getInstance().getTexture(sr.texName));
+		playerSprite.setTextureRect(sr.texRect);
+	}
+
+	
+	
+}
+
+void GameProject::spawnBarrel()
+{
+
+	if (_barrelsSpawned) return;
+
+	_barrels.clear();
+
+	std::uniform_real_distribution<float> distX(0.0f, 1024.0f); // Adjust to match screen width
+	std::uniform_real_distribution<float> distY(0.0f, 768.0f);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		auto barrel = _entityManager.addEntity("Barrel");
+		float x = distX(rng);
+		float y = distY(rng);
+		barrel->addComponent<CTransform>(sf::Vector2f(x, y));
+		barrel->addComponent<CSprite>(Assets::getInstance().getTexture("Barrel"));
+		_barrels.push_back(barrel);
+	}
+	_barrelsSpawned = true;
+}
+
+void GameProject::spawnBone()
+{
+	if (_bonesSpawned) return;
+
+	_bones.clear();
+
+	std::uniform_real_distribution<float> distX(0.0f, 1024.0f); // Adjust to match screen width
+	std::uniform_real_distribution<float> distY(0.0f, 768.0f);  // Adjust for height
+
+	for (int i = 0; i < 5; ++i)
+	{
+		auto bone = _entityManager.addEntity("Bone");
+		float x = distX(rng);
+		float y = distY(rng);
+		bone->addComponent<CTransform>(sf::Vector2f(x, y));
+		bone->addComponent<CSprite>(Assets::getInstance().getTexture("Bone"));
+		_bones.push_back(bone);
+	}
+	_bonesSpawned = true;
+}
+
+
+
+
+void GameProject::handleBarking()
+{
+	if (!_barrels.empty())
+	{
+		// Remove the last spawned barrel
+		auto barrelToRemove = _barrels.back();
+		barrelToRemove->destroy(); // Mark entity for removal
+		_barrels.pop_back(); // Remove from the vector
+
+		// Play explosion sound
+		SoundPlayer::getInstance().play("Explosion1");
+
+		//_barrels.front()->destroy();
+		//_barrels.erase(_barrels.begin()); // Remove from vector
+	}
 }
 
 void GameProject::adjustPlayerPosition()
@@ -230,6 +381,8 @@ void GameProject::init(const std::string& levelPath)
 
 	spawnPlayer(spawnPos);
 
+	
+
 	//if (!_font.loadFromFile("assets/fonts/Arial.ttf")) { // Replace with your font path
 	//	throw std::runtime_error("Failed to load font!");
 	//}
@@ -244,6 +397,10 @@ void GameProject::init(const std::string& levelPath)
 	m_countdownTime = 3.0f;
 	m_raceTime = 0.0f;
 	m_timerActive = false;
+
+
+	
+	
 
 
 
@@ -272,6 +429,8 @@ void GameProject::init(const std::string& levelPath)
 	m_countdownText.setFillColor(sf::Color::Red);
 	m_countdownText.setPosition(_worldView.getSize().x / 2.f - 20.f, _worldView.getSize().y / 2.f - 20.f);
 	m_countdownText.setString(std::to_string(static_cast<int>(m_countdownTime))); // Initial display
+
+	
 	
 }
 
@@ -317,6 +476,7 @@ void GameProject::loadLevel(const std::string& path)
 
 void GameProject::update(sf::Time dt)
 {
+
 	sUpdate(dt);
 }
 
@@ -332,6 +492,9 @@ void GameProject::sDoAction(const Command& command)
 				//_barkCounter--;                               // Decrease the counter
 				//updateBarkText();                             // Update displayed text
 			}
+			handleBarking();
+
+
 		}
 		if (command.name() == "PAUSE") { setPaused(!_isPaused); }
 		else if (command.name() == "QUIT") { _game->quitLevel(); }
@@ -360,12 +523,7 @@ void GameProject::sDoAction(const Command& command)
 	}
 }
 
-//void GameProject::updateBarkText()
-//{
-//	std::ostringstream oss;
-//	oss << "Barks: " << _barkCounter;
-//	_barkText.setString(oss.str());
-//}
+//
 
 //void GameProject::spawnBarrels() {
 //	
@@ -377,7 +535,10 @@ void GameProject::sDoAction(const Command& command)
 //		barrel->addComponent<CTransform>(sf::Vector2f(xPos(rng), yPos(rng)));
 //		auto anim = Assets::getInstance().getAnimation("barrel");
 //		barrel->addComponent<CAnimation>(anim);
-//		barrel->addComponent<CBoundingBox>(sf::IntRect(0, 0, anim.frameSize.x, anim.frameSize.y));
+//		barrel->addComponent<CBoundingBox>(sf::IntRect(0, 0, anim._frames[0].width, anim._frames[0].height));
+//		if (!anim._frames.empty()) {
+//			barrel->addComponent<CBoundingBox>(sf::IntRect(0, 0, anim._frames[0].width, anim._frames[0].height));
+//		}
 //	}
 //	
 //}
@@ -392,13 +553,87 @@ void GameProject::sDoAction(const Command& command)
 //		}
 //	}
 //}
-//
+
 //void GameProject::startAnimation(sPtrEntt e, std::string animation) {
 //	e->addComponent<CAnimation>(Assets::getInstance().getAnimation(animation));
 //	e->getComponent<CTransform>().vel = sf::Vector2f(0, 0);
 //	e->removeComponent<CBoundingBox>();
 //	e->addComponent<CState>().state = "Exploding";
 //}
+
+//void GameProject::spawnBarrels() {
+//	std::random_device rd;
+//	std::mt19937 gen(rd());
+//	std::uniform_real_distribution<float> xDist(100.f, 700.f);
+//	std::uniform_real_distribution<float> yDist(100.f, 500.f);
+//
+//	for (int i = 0; i < 5; ++i) {
+//		auto barrel = m_game->_entityManager.addEntity("barrel");
+//		barrel->setPosition(sf::Vector2f(xDist(gen), yDist(gen)));
+//	}
+//}
+//
+//
+//void GameProject::checkBarkCollision() {
+//	auto& barrels = _entityManager.getEntities("barrel"); // Use correct way to get entities
+//
+//	for (auto& barrel : barrels) {
+//		if (!barrel->isActive()) continue;
+//
+//		// Assuming position is stored in a component like CTransform
+//		if (barrel->hasComponent<CTransform>()) {
+//			auto barrelPos = barrel->getComponent<CTransform>()->pos;
+//			auto playerPos = _player->getComponent<CTransform>()->pos;
+//
+//			float barkRange = 100.0f; // Adjust as needed
+//			if (distance(playerPos, barrelPos) < barkRange) {
+//				barrel->destroy(); // Assuming this method exists
+//			}
+//		}
+//	}
+//}
+//
+//void GameProject::onBark() {
+//	if (!canBark()) return;
+//
+//	_barkCounter--;
+//	updateBarkText();
+//
+//	checkBarkCollision();
+//}
+
+//void GameProject::spawnBarrel()
+//{
+//	const int numBarrels = 3; // Number of barrels to spawn
+//	std::vector<sf::Vector2f> barrelPositions;
+//
+//	// Define the boundaries for spawning barrels
+//	float minX = 50.0f, maxX = 750.0f; // Adjust according to your map size
+//	float minY = 100.0f, maxY = 500.0f;
+//
+//	for (int i = 0; i < numBarrels; ++i)
+//	{
+//		// Generate a random position within the defined bounds
+//		float x = minX + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxX - minX)));
+//		float y = minY + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxY - minY)));
+//
+//		sf::Vector2f position(x, y);
+//		barrelPositions.push_back(position);
+//
+//		// Create the barrel entity
+//		auto entity = _entityManager.addEntity("barrel");
+//
+//		// Assign components
+//		entity->addComponent<CTransform>(position);
+//		entity->addComponent<CBoundingBox>(sf::Vector2f(32, 32)); // Assuming 32x32 sprite size
+//		//entity->addComponent<CAnimation>(m_game->assets().getAnimation("Barrel"), true);
+//
+//		// Add any other necessary components (e.g., physics, interactions)
+//	}
+//}
+
+
+
 
 void GameProject::sRender()
 {
@@ -473,6 +708,7 @@ void GameProject::sRender()
 		_game->window().draw(timerText);
 		_game->window().draw(m_countdownText);
 	}
+	spawnBarrel();
 	/*_barkText.setPosition(5.0f, -5.0f);
 	_barkText.setString("Barks  " + std::to_string(_barkCounter));
 	_game->window().draw(_barkText);*/

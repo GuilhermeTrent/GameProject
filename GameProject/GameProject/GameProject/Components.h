@@ -6,6 +6,7 @@
 #define BREAKOUT_COMPONENTS_H
 
 
+#include "Animation.h"
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include "Utilities.h"
@@ -85,8 +86,13 @@ struct CAnimation : public Component
     sf::Time        countDown{ sf::Time::Zero };
     bool            isRepeat{ true };
 
-    CAnimation() = default;
+    Animation   animation;
 
+    CAnimation() = default;
+    CAnimation(const Animation& a) : animation(a) {}
+
+
+    
     
 
     inline bool    isFinished() {

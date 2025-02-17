@@ -42,7 +42,7 @@ class GameProject : public Scene
     void                    onBark();
 
     // helper functions
-    void spawnBarrels();
+//  //  void spawnBarrels();
 void checkBarkCollision();
 void startAnimation(sPtrEntt e, std::string animation);
    // void                    startAnimation(sPtrEntt e, std::string animation);
@@ -58,6 +58,15 @@ void startAnimation(sPtrEntt e, std::string animation);
     void                    init(const std::string& path);
     void                    loadLevel(const std::string& path);
     void                    updateBarkText();
+    void                    spawnBarrel();
+    void                    handleBarking();
+    void                    spawnBone();
+
+    std::vector<std::shared_ptr<Entity>> _barrels;
+    bool _barrelsSpawned = false;
+
+    std::vector<std::shared_ptr<Entity>> _bones;
+    bool _bonesSpawned = false;
 
     float m_countdownTime = 3.0f; // Countdown before race starts
     float m_raceTime = 0.0f;      // Race time after countdown
@@ -65,7 +74,11 @@ void startAnimation(sPtrEntt e, std::string animation);
 
     sf::Text _timerText;
     sf::Text m_countdownText;
-    //std::shared_ptr<Entity> _backgroundEntity;
+    std::shared_ptr<Entity> _backgroundEntity;
+
+    bool _playerSpeedBoost = false;
+    float _speedBoostTimer = 0.0f;
+    float _deltaTime = 0.016f; // Example, should be set from your game loop
 
 //private:
 //    sf::Text _barkText;        
