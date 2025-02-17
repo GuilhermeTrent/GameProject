@@ -28,7 +28,7 @@ void Scene_Menu::init()
 	registerAction(sf::Keyboard::D, "PLAY");
 	registerAction(sf::Keyboard::Escape, "QUIT");
 
-	m_title = "Project - Guilherme";
+	m_title = "How    I    train    my    Pug";
 	m_menuStrings.push_back("Level 1");
 	m_menuStrings.push_back("Level 2");
 	m_menuStrings.push_back("Level 3");
@@ -57,22 +57,35 @@ void Scene_Menu::sRender()
 	view.setCenter(_game->window().getSize().x / 2.f, _game->window().getSize().y / 2.f);
 	_game->window().setView(view);
 
+	
+	sf::Sprite backgroundSprite;
+	backgroundSprite.setTexture(Assets::getInstance().getTexture("MenuBackground")); 
+	backgroundSprite.setPosition(0, 0); 
+	backgroundSprite.setScale(
+		_game->window().getSize().x / backgroundSprite.getLocalBounds().width,
+		_game->window().getSize().y / backgroundSprite.getLocalBounds().height
+	);
+
+	
+	_game->window().draw(backgroundSprite);
+
+	
 	static const sf::Color selectedColor(255, 255, 255);
 	static const sf::Color normalColor(0, 0, 0);
 
-	static const sf::Color backgroundColor(100, 100, 255);
-
+	// Footer text
 	sf::Text footer("UP: W    DOWN: S   PLAY:D    QUIT: ESC",
 		Assets::getInstance().getFont("Arial"), 20);
 	footer.setFillColor(normalColor);
 	footer.setPosition(32, 700);
 
-
+	// Menu title
 	m_menuText.setFillColor(normalColor);
 	m_menuText.setString(m_title);
 	m_menuText.setPosition(10, 10);
 	_game->window().draw(m_menuText);
 
+	// Render menu options
 	for (size_t i{ 0 }; i < m_menuStrings.size(); ++i)
 	{
 		m_menuText.setFillColor((i == m_menuIndex ? selectedColor : normalColor));
@@ -81,7 +94,8 @@ void Scene_Menu::sRender()
 		_game->window().draw(m_menuText);
 	}
 
-	_game->window().draw(footer);
+	// Draw footer
+	_game->window().draw(footer);;
 
 }
 

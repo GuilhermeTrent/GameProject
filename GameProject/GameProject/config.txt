@@ -20,6 +20,7 @@ Texture PugLeft  ../assets/Textures/pug_left.png
 Texture PugRight ../assets/Textures/pug_right.png
 Texture Bone     ../assets/Textures/bone.png
 Texture PR_Fart ../assets/Textures/pug_right_farting.png
+Texture MenuBackground ../assets/Textures/resting.jpg
 
 
 #
@@ -41,6 +42,7 @@ Sprite PugRight       PugRight 1   1  30   30
 Sprite Barrel         Barrel   1   1   30   30
 Sprite Bone		Bone   1   1   30   30
 Sprite PR_Fart		PR_Fart   1   1   40  40 
+Sprite MenuBackground   MenuBackground  1   1   1024  768
 
 #
 #  Animation    Name            Texture     Speed   Repeats

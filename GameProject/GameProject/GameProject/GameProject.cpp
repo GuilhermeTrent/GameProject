@@ -63,10 +63,10 @@ void GameProject::sUpdate(sf::Time dt)
 	SoundPlayer::getInstance().removeStoppedSounds();
 	_entityManager.update();
 
-	// Update bark counter text
+	
 	_barkText.setString("Barks: " + std::to_string(_barkCounter));
 
-	// Keep text in the top-left even if the camera moves
+	
 	_barkText.setPosition(
 		_worldView.getCenter().x - _worldView.getSize().x / 2.f + 10.f,
 		_worldView.getCenter().y - _worldView.getSize().y / 2.f + 10.f
@@ -96,7 +96,7 @@ void GameProject::sUpdate(sf::Time dt)
 	spawnBone();
 
 
-	if (!_player) return; // Ensure _player exists
+	if (!_player) return; 
 
 	auto& playerTransform = _player->getComponent<CTransform>();
 	auto& playerSprite = _player->getComponent<CSprite>();
@@ -121,10 +121,13 @@ void GameProject::sUpdate(sf::Time dt)
 			playerTransform.vel.x += (playerTransform.vel.x >= 0) ? 100.0f : -100.0f;
 			playerTransform.vel.y += (playerTransform.vel.y >= 0) ? 50.0f : -50.0f;
 
-			// Change texture if moving to the right
+			
 			if (playerTransform.vel.x > 0)
 			{
+				auto& sr = Assets::getInstance().getSpriteRec("PR_Fart");
 				playerSprite.sprite.setTexture(Assets::getInstance().getTexture("PR_Fart"));
+				/*playerSprite.setTexture(Assets::getInstance().getTexture(sr.texName));
+				playerSprite.setTextureRec(sr.texRect);*/
 			}
 		}
 	}
@@ -132,14 +135,22 @@ void GameProject::sUpdate(sf::Time dt)
 	// Handle speed boost duration
 	if (_playerSpeedBoost)
 	{
-		_speedBoostTimer -= _deltaTime;
+		_speedBoostTimer -= dt.asSeconds();
 		if (_speedBoostTimer <= 0.0f)
 		{
 			_playerSpeedBoost = false;
-			playerTransform.vel = sf::Vector2f(0.0f, 0.0f); // Reset speed
+			_speedBoostTimer = 0.0f;
+
+			// Reset speed to normal (instead of setting it to zero)
+			_player->getComponent<CTransform>().vel = normalize(_player->getComponent<CTransform>().vel) * _config.playerSpeed;
+			//_playerSpeedBoost = false;
+			//playerTransform.vel = sf::Vector2f(0.0f, 0.0f); // Reset speed
 
 			// Reset texture to default after farting ends
-			playerSprite.sprite.setTexture(Assets::getInstance().getTexture("PugRight"));
+			//playerSprite.sprite.setTexture(Assets::getInstance().getTexture("PugRight"));
+			auto& sr = Assets::getInstance().getSpriteRec("PugRight");
+			playerSprite.sprite.setTexture(Assets::getInstance().getTexture(sr.texName));
+			playerSprite.sprite.setTextureRect(sr.texRect);
 		}
 	}
 
@@ -148,20 +159,7 @@ void GameProject::sUpdate(sf::Time dt)
 
 }
 
-//void Scene_Planes::onBark()
-//{
-//    if (!canBark()) {
-//        std::cout << "No more barks left!" << std::endl;
-//        return;
-//    }
-//
-//    _barkCount--; // Decrease bark count
-//
-//    // Update text immediately so it refreshes before the next frame
-//    _barkText.setString("Barks: " + std::to_string(_barkCount));
-//
-//    std::cout << "Barked! Remaining: " << _barkCount << std::endl;
-//}
+
 
 void GameProject::onEnd()
 {
@@ -231,6 +229,9 @@ void GameProject::spawnPlayer(sf::Vector2f pos)
 
 void GameProject::playerMovement()
 {
+
+	if (_playerSpeedBoost) return;
+
 	sf::Vector2f playerVel{ 0.f, 0.f };
 	auto& pInput = _player->getComponent<CInput>();
 	if (pInput.left) playerVel.x -= 1;
@@ -290,7 +291,7 @@ void GameProject::spawnBarrel()
 
 	_barrels.clear();
 
-	std::uniform_real_distribution<float> distX(0.0f, 1024.0f); // Adjust to match screen width
+	std::uniform_real_distribution<float> distX(0.0f, 1024.0f); 
 	std::uniform_real_distribution<float> distY(0.0f, 768.0f);
 
 	for (int i = 0; i < 3; ++i)
@@ -311,8 +312,8 @@ void GameProject::spawnBone()
 
 	_bones.clear();
 
-	std::uniform_real_distribution<float> distX(0.0f, 1024.0f); // Adjust to match screen width
-	std::uniform_real_distribution<float> distY(0.0f, 768.0f);  // Adjust for height
+	std::uniform_real_distribution<float> distX(0.0f, 1024.0f); 
+	std::uniform_real_distribution<float> distY(0.0f, 768.0f);  
 
 	for (int i = 0; i < 5; ++i)
 	{
@@ -333,12 +334,12 @@ void GameProject::handleBarking()
 {
 	if (!_barrels.empty())
 	{
-		// Remove the last spawned barrel
+		
 		auto barrelToRemove = _barrels.back();
-		barrelToRemove->destroy(); // Mark entity for removal
-		_barrels.pop_back(); // Remove from the vector
+		barrelToRemove->destroy(); 
+		_barrels.pop_back(); 
 
-		// Play explosion sound
+		
 		SoundPlayer::getInstance().play("Explosion1");
 
 		//_barrels.front()->destroy();
@@ -383,9 +384,7 @@ void GameProject::init(const std::string& levelPath)
 
 	
 
-	//if (!_font.loadFromFile("assets/fonts/Arial.ttf")) { // Replace with your font path
-	//	throw std::runtime_error("Failed to load font!");
-	//}
+	
 
 	MusicPlayer::getInstance().play("gameTheme");
 	MusicPlayer::getInstance().setVolume(5);
@@ -404,25 +403,6 @@ void GameProject::init(const std::string& levelPath)
 
 
 
-	//m_game->soundPlayer().play("countdown");
-	// Load the font for the bark counter
-	/*if (!_barkFont.loadFromFile("assets/fonts/Arcade.ttf")) {
-		std::cerr << "Error loading font for bark counter!" << std::endl;
-	}*/
-
-	// Set up the bark counter text
-	//_barkText.setFont(_barkFont);
-	//_barkText.setCharacterSize(24);
-	//_barkText.setFillColor(sf::Color::White);
-	//_barkText.setStyle(sf::Text::Bold);
-	//_barkText.setString("Barks: " + std::to_string(_barkCounter)); // Start with 2 barks
-	//_barkText.setPosition(10.f, 10.f);
-
-	//_barkText.setFont(_font);
-	//_barkText.setCharacterSize(24);
-	//_barkText.setFillColor(sf::Color::White);
-	//_barkText.setPosition(10.f, 10.f); // Top-left corner
-	//updateBarkText();
 	
 	m_countdownText.setFont(Assets::getInstance().getFont("main"));
 	m_countdownText.setCharacterSize(30);
@@ -489,8 +469,7 @@ void GameProject::sDoAction(const Command& command)
 				SoundPlayer::getInstance().play("PugBarks"); 
 				_barkCounter-= 1;
 				_barkText.setString("Barks: " + std::to_string(_barkCounter));
-				//_barkCounter--;                               // Decrease the counter
-				//updateBarkText();                             // Update displayed text
+				
 			}
 			handleBarking();
 
@@ -525,54 +504,11 @@ void GameProject::sDoAction(const Command& command)
 
 //
 
-//void GameProject::spawnBarrels() {
-//	
-//	std::uniform_real_distribution<float> xPos(50, 750);
-//	std::uniform_real_distribution<float> yPos(50, 550);
-//
-//	for (int i = 0; i < 4; i++) {
-//		auto barrel = _entityManager.addEntity("Barrel");
-//		barrel->addComponent<CTransform>(sf::Vector2f(xPos(rng), yPos(rng)));
-//		auto anim = Assets::getInstance().getAnimation("barrel");
-//		barrel->addComponent<CAnimation>(anim);
-//		barrel->addComponent<CBoundingBox>(sf::IntRect(0, 0, anim._frames[0].width, anim._frames[0].height));
-//		if (!anim._frames.empty()) {
-//			barrel->addComponent<CBoundingBox>(sf::IntRect(0, 0, anim._frames[0].width, anim._frames[0].height));
-//		}
-//	}
-//	
-//}
-//
-//void GameProject::checkBarkCollision() {
-//	for (auto barrel : _entityManager.getEntities("Barrel")) {
-//		auto overlap = Physics::getOverlap(_player, barrel);
-//		if (overlap.x > 0 && overlap.y > 0) {
-//			startAnimation(barrel, "explosion");
-//			barrel->destroy();
-//			SoundPlayer::getInstance().play("Explosion1", barrel->getComponent<CTransform>().pos);
-//		}
-//	}
-//}
 
-//void GameProject::startAnimation(sPtrEntt e, std::string animation) {
-//	e->addComponent<CAnimation>(Assets::getInstance().getAnimation(animation));
-//	e->getComponent<CTransform>().vel = sf::Vector2f(0, 0);
-//	e->removeComponent<CBoundingBox>();
-//	e->addComponent<CState>().state = "Exploding";
-//}
 
-//void GameProject::spawnBarrels() {
-//	std::random_device rd;
-//	std::mt19937 gen(rd());
-//	std::uniform_real_distribution<float> xDist(100.f, 700.f);
-//	std::uniform_real_distribution<float> yDist(100.f, 500.f);
-//
-//	for (int i = 0; i < 5; ++i) {
-//		auto barrel = m_game->_entityManager.addEntity("barrel");
-//		barrel->setPosition(sf::Vector2f(xDist(gen), yDist(gen)));
-//	}
-//}
-//
+
+
+
 //
 //void GameProject::checkBarkCollision() {
 //	auto& barrels = _entityManager.getEntities("barrel"); // Use correct way to get entities
@@ -593,44 +529,6 @@ void GameProject::sDoAction(const Command& command)
 //	}
 //}
 //
-//void GameProject::onBark() {
-//	if (!canBark()) return;
-//
-//	_barkCounter--;
-//	updateBarkText();
-//
-//	checkBarkCollision();
-//}
-
-//void GameProject::spawnBarrel()
-//{
-//	const int numBarrels = 3; // Number of barrels to spawn
-//	std::vector<sf::Vector2f> barrelPositions;
-//
-//	// Define the boundaries for spawning barrels
-//	float minX = 50.0f, maxX = 750.0f; // Adjust according to your map size
-//	float minY = 100.0f, maxY = 500.0f;
-//
-//	for (int i = 0; i < numBarrels; ++i)
-//	{
-//		// Generate a random position within the defined bounds
-//		float x = minX + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxX - minX)));
-//		float y = minY + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxY - minY)));
-//
-//		sf::Vector2f position(x, y);
-//		barrelPositions.push_back(position);
-//
-//		// Create the barrel entity
-//		auto entity = _entityManager.addEntity("barrel");
-//
-//		// Assign components
-//		entity->addComponent<CTransform>(position);
-//		entity->addComponent<CBoundingBox>(sf::Vector2f(32, 32)); // Assuming 32x32 sprite size
-//		//entity->addComponent<CAnimation>(m_game->assets().getAnimation("Barrel"), true);
-//
-//		// Add any other necessary components (e.g., physics, interactions)
-//	}
-//}
 
 
 
@@ -708,10 +606,6 @@ void GameProject::sRender()
 		_game->window().draw(timerText);
 		_game->window().draw(m_countdownText);
 	}
-	spawnBarrel();
-	/*_barkText.setPosition(5.0f, -5.0f);
-	_barkText.setString("Barks  " + std::to_string(_barkCounter));
-	_game->window().draw(_barkText);*/
-	// Draw bark counter
-	//_game->window().draw(_barkText);
+	
+	
 }
