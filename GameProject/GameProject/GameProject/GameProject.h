@@ -78,7 +78,7 @@ void startAnimation(sPtrEntt e, std::string animation);
 
     bool _playerSpeedBoost = false;
     float _speedBoostTimer = 0.0f;
-    float _deltaTime = 0.016f; // Example, should be set from your game loop
+    float _deltaTime = 0.016f; 
 
 //private:
 //    sf::Text _barkText;        

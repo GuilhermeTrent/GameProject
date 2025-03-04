@@ -229,7 +229,12 @@ void GameProject::spawnPlayer(sf::Vector2f pos)
 
 void GameProject::playerMovement()
 {
-
+	if (!m_timerActive)
+	{
+		
+		_player->getComponent<CTransform>().vel = sf::Vector2f(0.f, 0.f);
+		return;
+	}
 	if (_playerSpeedBoost) return;
 
 	sf::Vector2f playerVel{ 0.f, 0.f };
@@ -469,9 +474,9 @@ void GameProject::sDoAction(const Command& command)
 				SoundPlayer::getInstance().play("PugBarks"); 
 				_barkCounter-= 1;
 				_barkText.setString("Barks: " + std::to_string(_barkCounter));
-				
+				handleBarking();
 			}
-			handleBarking();
+			
 
 
 		}
