@@ -245,6 +245,23 @@ void GameProject::playerMovement()
 	if (pInput.down) playerVel.y += 1;
 
 	playerVel = _config.playerSpeed * normalize(playerVel);
+
+	auto& playerPos = _player->getComponent<CTransform>().pos;
+	sf::Vector2u imageSize = _backgroundImage.getSize();
+	unsigned int px = static_cast<unsigned int>(playerPos.x);
+	unsigned int py = static_cast<unsigned int>(playerPos.y);
+
+	
+	if (px < imageSize.x && py < imageSize.y) {
+		sf::Color pixelColor = _backgroundImage.getPixel(px, py);
+
+		// Range green
+		if (pixelColor.r >= 15 && pixelColor.r <= 30 &&  
+			pixelColor.g >= 210 && pixelColor.g <= 230 && 
+			pixelColor.b >= 20 && pixelColor.b <= 35) {  
+			playerVel *= 0.5f; 
+		}
+	}
 	_player->getComponent<CTransform>().vel = playerVel;
 }
 
@@ -378,6 +395,7 @@ void GameProject::adjustPlayerPosition()
 
 void GameProject::init(const std::string& levelPath)
 {
+	_backgroundImage = Assets::getInstance().getTexture("Park").copyToImage();
 	loadLevel(levelPath);
 	registerActions();
 

@@ -75,6 +75,7 @@ void startAnimation(sPtrEntt e, std::string animation);
     sf::Text _timerText;
     sf::Text m_countdownText;
     std::shared_ptr<Entity> _backgroundEntity;
+    sf::Image _backgroundImage;
 
     bool _playerSpeedBoost = false;
     float _speedBoostTimer = 0.0f;
