@@ -35,6 +35,7 @@ void Scene_Menu::init()
 
 	m_levelPaths.push_back("../level1.txt");
 	m_levelPaths.push_back("../level2.txt");
+	m_levelPaths.push_back("../level3.txt");
 	//m_levelPaths.push_back("../level1.txt");
 
 	m_menuText.setFont(Assets::getInstance().getFont("Arcade"));
@@ -74,7 +75,7 @@ void Scene_Menu::sRender()
 	static const sf::Color normalColor(0, 0, 0);
 
 	// Footer text
-	sf::Text footer("UP: W    DOWN: S   PLAY:D    QUIT: ESC",
+	sf::Text footer("Game Controls  UP: W    DOWN: S  LEFT: A     RIGHT: D    QUIT: Q    BARK: E",
 		Assets::getInstance().getFont("Arial"), 20);
 	footer.setFillColor(normalColor);
 	footer.setPosition(32, 700);

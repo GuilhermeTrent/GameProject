@@ -1,0 +1,9 @@
+# Level 3
+
+World 1920 1080
+
+PlayerSpeed 100
+
+Bkg Snow 0 0
+
+

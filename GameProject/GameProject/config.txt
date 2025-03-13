@@ -1,6 +1,6 @@
 # Game Config
 
-Window  1024 768
+Window  1920 1080
  
 Font    Arial      	../assets/fonts/arial.ttf
 Font    main       	../assets/fonts/Sansation.ttf
@@ -13,6 +13,7 @@ Music gameTheme  ../assets/Music/dp_frogger_tweener.flac
 Texture Pug      ../assets/Textures/pug_testing.png
 Texture Park     ../assets/Textures/park_test.png
 Texture Beach    ../assets/Textures/beach.png
+Texture Snow     ../assets/Textures/snow_track.png
 Texture Barrel   ../assets/Textures/barrel.png
 Texture PugDown  ../assets/Textures/pug_down.png
 Texture PugUp    ../assets/Textures/pug_up.png
@@ -33,7 +34,7 @@ Sound Explosion2    ../assets/Sound/Explosion2.wav
 Sound Fart          ../assets/Sound/fart.wav
 
 # Sprites
-Sprite background      Park    1   1  1024  768
+Sprite background      Park    1   1  1920  1080
 Sprite playerPug       Pug      1   1  30   30
 Sprite  PugDown        PugDown  1   1  30   30
 Sprite PugUp          PugUp    1   1  30   30
@@ -42,7 +43,7 @@ Sprite PugRight       PugRight 1   1  30   30
 Sprite Barrel         Barrel   1   1   30   30
 Sprite Bone		Bone   1   1   30   30
 Sprite PR_Fart		PR_Fart   1   1   40  40 
-Sprite MenuBackground   MenuBackground  1   1   1024  768
+Sprite MenuBackground   MenuBackground  1   1   1920  1080
 
 #
 #  Animation    Name            Texture     Speed   Repeats
