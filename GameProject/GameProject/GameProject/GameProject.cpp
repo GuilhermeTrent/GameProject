@@ -14,13 +14,63 @@
 
 std::mt19937 rng{ std::random_device{}() };
 
+
+struct Snowflake {
+	sf::CircleShape shape;
+	float speed;
+};
+
+
+std::vector<Snowflake> snowflakes;
+
+void initSnowflakes(int count) {
+	snowflakes.clear();
+	for (int i = 0; i < count; i++) {
+		Snowflake snow;
+		snow.shape.setRadius(static_cast<float>(rand() % 3 + 2));
+		snow.shape.setFillColor(sf::Color(255, 255, 255, 150));
+		snow.shape.setPosition(rand() % 1920, rand() % 1080);
+		snow.speed = static_cast<float>(rand() % 3 + 1);
+		snowflakes.push_back(snow);
+	}
+}
+
+
+
+
+void updateSnowflakes() {
+	for (auto& snow : snowflakes) {
+		snow.shape.move(0, snow.speed);
+		if (snow.shape.getPosition().y > 1080) {
+			snow.shape.setPosition(rand() % 1920, -10);
+		}
+	}
+}
+
+
+void renderSnowflakes(sf::RenderWindow& window) {
+	for (const auto& snow : snowflakes) {
+		window.draw(snow.shape);
+	}
+}
+
 GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 	: Scene(gameEngine)
 	, _worldView(gameEngine->window().getDefaultView())
 
 {
 	init(levelPath);
+
+
+
+	if (levelPath.find("../level3.txt") != std::string::npos) {
+		_enableSnow = true;
+		initSnowflakes(100); 
+	}
 }
+
+
+
 
 void GameProject::sAnimation(sf::Time dt)
 {
@@ -129,6 +179,10 @@ void GameProject::sUpdate(sf::Time dt)
 				/*playerSprite.setTexture(Assets::getInstance().getTexture(sr.texName));
 				playerSprite.setTextureRec(sr.texRect);*/
 			}
+		}
+		// Only update snow if it's enabled
+		if (_enableSnow) {
+			updateSnowflakes();
 		}
 	}
 
@@ -406,7 +460,7 @@ void GameProject::init(const std::string& levelPath)
 	spawnPlayer(spawnPos);
 
 	
-
+	initSnowflakes(100);
 	
 
 	MusicPlayer::getInstance().play("gameTheme");
@@ -552,9 +606,7 @@ void GameProject::sDoAction(const Command& command)
 //	}
 //}
 //
-
-
-
+	
 
 void GameProject::sRender()
 {
@@ -630,5 +682,7 @@ void GameProject::sRender()
 		_game->window().draw(m_countdownText);
 	}
 	
-	
+	if (_enableSnow) {
+		renderSnowflakes(_game->window());
+	}
 }

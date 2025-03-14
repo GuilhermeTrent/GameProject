@@ -81,7 +81,8 @@ void startAnimation(sPtrEntt e, std::string animation);
     float _speedBoostTimer = 0.0f;
     float _deltaTime = 0.016f; 
 
-//private:
+private:
+    bool _enableSnow = false;
 //    sf::Text _barkText;        
 //    sf::Font _barkFont;           
 //    int _barkCounter = 2;   
