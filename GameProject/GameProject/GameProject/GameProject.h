@@ -3,6 +3,8 @@
 #include "Scene.h"
 #include <queue>
 
+
+
 struct SpawnPoint {
     std::string type;
     float       y;
@@ -31,6 +33,8 @@ class GameProject : public Scene
 
     bool                            _drawTextures{ true };
     bool                            _drawAABB{ false };
+
+
 
     //systems
     void                    sAnimation(sf::Time dt);
@@ -76,6 +80,8 @@ void startAnimation(sPtrEntt e, std::string animation);
     sf::Text m_countdownText;
     std::shared_ptr<Entity> _backgroundEntity;
     sf::Image _backgroundImage;
+    sf::Image _backgroundImageBeach;
+    sf::Image _backgroundImageSnow;
 
     bool _playerSpeedBoost = false;
     float _speedBoostTimer = 0.0f;
@@ -83,18 +89,23 @@ void startAnimation(sPtrEntt e, std::string animation);
 
 private:
     bool _enableSnow = false;
+    std::string _levelPath;
 //    sf::Text _barkText;        
 //    sf::Font _barkFont;           
 //    int _barkCounter = 2;   
 //
     bool canBark() const { return _barkCounter > 0; }
+  
 
 public:
     GameProject(GameEngine* gameEngine, const std::string& levelPath);
 
+    
+
     void		            update(sf::Time dt) override;
     void		            sDoAction(const Command& command) override;
     void		            sRender() override;
+    void spawnPlayerForLevel();
 
    /* sf::Text _barkText;
     sf::Font _barkFont;

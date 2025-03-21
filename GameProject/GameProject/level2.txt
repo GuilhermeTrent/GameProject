@@ -1,6 +1,6 @@
 # Level 2
 
-World 1024 768
+World 1920 1080
 
 PlayerSpeed 100
 

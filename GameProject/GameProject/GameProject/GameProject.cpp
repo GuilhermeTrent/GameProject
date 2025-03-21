@@ -56,11 +56,13 @@ void renderSnowflakes(sf::RenderWindow& window) {
 
 GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 	: Scene(gameEngine)
-	, _worldView(gameEngine->window().getDefaultView())
+	, _worldView(gameEngine->window().getDefaultView()),
+	_levelPath(levelPath)
 
 {
 	init(levelPath);
 
+	spawnPlayerForLevel();
 
 
 	if (levelPath.find("../level3.txt") != std::string::npos) {
@@ -229,9 +231,9 @@ void GameProject::checkIfDead(sPtrEntt e)
 {
 }
 
-void GameProject::checkPlayerCollision()
-{
-}
+
+
+
 
 void GameProject::destroyOutsideWindow()
 {
@@ -360,15 +362,122 @@ void GameProject::annimatePlayer()
 	
 }
 
+//bool checkCollision(Player player, Barrel barrel) {
+//	return (player.x < barrel.x + barrel.width &&
+//		player.x + player.width > barrel.x &&
+//		player.y < barrel.y + barrel.height &&
+//		player.y + player.height > barrel.y);
+//}
+
 void GameProject::spawnBarrel()
 {
 
 	if (_barrelsSpawned) return;
 
 	_barrels.clear();
+	int mapWidth, mapHeight;
+	sf::Image* selectedBackground;
 
-	std::uniform_real_distribution<float> distX(0.0f, 1024.0f); 
-	std::uniform_real_distribution<float> distY(0.0f, 768.0f);
+	// Determine which background is being used
+	if (_levelPath.find("level2.txt") != std::string::npos) {
+		selectedBackground = &_backgroundImageBeach;
+	}
+	else if (_levelPath.find("level3.txt") != std::string::npos) {
+		selectedBackground = &_backgroundImageSnow;
+	}
+	else {
+		selectedBackground = &_backgroundImage;
+	}
+
+	mapWidth = selectedBackground->getSize().x;
+	mapHeight = selectedBackground->getSize().y;
+
+	std::uniform_int_distribution<int> distX(0, mapWidth - 1);
+	std::uniform_int_distribution<int> distY(0, mapHeight - 1);
+
+	for (int i = 0; i < 3; ++i) {
+		bool validSpawn = false;
+		int x, y;
+
+		while (!validSpawn) {
+			x = distX(rng);
+			y = distY(rng);
+
+			if (x < mapWidth && y < mapHeight) {
+				sf::Color pixelColor = selectedBackground->getPixel(x, y);
+
+				if ((selectedBackground == &_backgroundImage && pixelColor.r == 66 && pixelColor.g == 80 && pixelColor.b == 86) ||
+					(selectedBackground == &_backgroundImageBeach && pixelColor.r == 66 && pixelColor.g == 80 && pixelColor.b == 86) ||
+					(selectedBackground == &_backgroundImageSnow && pixelColor.r == 100 && pixelColor.g == 103 && pixelColor.b == 100)) {
+					validSpawn = true;
+				}
+			}
+		}
+
+		auto barrel = _entityManager.addEntity("Barrel");
+		barrel->addComponent<CTransform>(sf::Vector2f(x, y));
+		barrel->addComponent<CSprite>(Assets::getInstance().getTexture("Barrel"));
+		_barrels.push_back(barrel);
+	}
+	_barrelsSpawned = true;
+
+	/*if (_barrelsSpawned) return;
+	int mapWidth = _backgroundImage.getSize().x;
+	int mapHeight = _backgroundImage.getSize().y;
+	
+
+	_barrels.clear();
+	std::uniform_int_distribution<int> distX(0, mapWidth - 1);
+	std::uniform_int_distribution<int> distY(0, mapHeight - 1);
+	
+
+
+
+	for (int i = 0; i < 3; ++i) {
+		bool validSpawn = false;
+		int x, y;
+
+		while (!validSpawn) {
+			x = distX(rng);
+			y = distY(rng);
+			sf::Vector2u imageSize = _backgroundImage.getSize();
+			sf::Vector2u imageSizeB = _backgroundImageBeach.getSize();
+			sf::Vector2u imageSizeS = _backgroundImageSnow.getSize();
+			if (x < imageSize.x && y < imageSize.y) {
+				sf::Color pixelColor = _backgroundImage.getPixel(x, y);
+
+				if (pixelColor.r == 66 && pixelColor.g == 80 && pixelColor.b == 86) {
+					validSpawn = true;
+				}
+			}
+			else if (x < imageSizeB.x && y < imageSizeB.y) {
+				sf::Color pixelColor = _backgroundImageBeach.getPixel(x, y);
+				if (pixelColor.r == 66 && pixelColor.g == 80 && pixelColor.b == 86) {
+					validSpawn = true;
+				}
+			}
+			else if (x < imageSizeS.x && y < imageSizeS.y) {
+				sf::Color pixelColor = _backgroundImageSnow.getPixel(x, y);
+				if (pixelColor.r == 100 && pixelColor.g == 103 && pixelColor.b == 100) {
+					validSpawn = true;
+				}
+			}
+		}
+
+		auto barrel = _entityManager.addEntity("Barrel");
+		barrel->addComponent<CTransform>(sf::Vector2f(x, y));
+		barrel->addComponent<CSprite>(Assets::getInstance().getTexture("Barrel"));
+		_barrels.push_back(barrel);
+	}
+	_barrelsSpawned = true;*/
+	
+	
+	/*if (_barrelsSpawned) return;
+
+	_barrels.clear();
+
+	std::uniform_real_distribution<float> distX(0.0f, 1920.0f); 
+	std::uniform_real_distribution<float> distY(0.0f, 1080.0f);
 
 	for (int i = 0; i < 3; ++i)
 	{
@@ -379,7 +488,7 @@ void GameProject::spawnBarrel()
 		barrel->addComponent<CSprite>(Assets::getInstance().getTexture("Barrel"));
 		_barrels.push_back(barrel);
 	}
-	_barrelsSpawned = true;
+	_barrelsSpawned = true;*/
 }
 
 void GameProject::spawnBone()
@@ -388,8 +497,8 @@ void GameProject::spawnBone()
 
 	_bones.clear();
 
-	std::uniform_real_distribution<float> distX(0.0f, 1024.0f); 
-	std::uniform_real_distribution<float> distY(0.0f, 768.0f);  
+	std::uniform_real_distribution<float> distX(0.0f, 1920.0f); 
+	std::uniform_real_distribution<float> distY(0.0f, 1080.0f);  
 
 	for (int i = 0; i < 5; ++i)
 	{
@@ -450,6 +559,8 @@ void GameProject::adjustPlayerPosition()
 void GameProject::init(const std::string& levelPath)
 {
 	_backgroundImage = Assets::getInstance().getTexture("Park").copyToImage();
+	_backgroundImageBeach = Assets::getInstance().getTexture("Beach").copyToImage();
+	_backgroundImageSnow = Assets::getInstance().getTexture("Snow").copyToImage();
 	loadLevel(levelPath);
 	registerActions();
 
@@ -606,7 +717,25 @@ void GameProject::sDoAction(const Command& command)
 //	}
 //}
 //
-	
+void GameProject::spawnPlayerForLevel()
+{
+	sf::Vector2f startPosition;
+
+	if (_levelPath.find("level1.txt") != std::string::npos) {
+		startPosition = sf::Vector2f(200.f, 500.f); // Adjust as needed for level 1
+	}
+	else if (_levelPath.find("level2.txt") != std::string::npos) {
+		startPosition = sf::Vector2f(300.f, 600.f); // Adjust as needed for level 2
+	}
+	else if (_levelPath.find("level3.txt") != std::string::npos) {
+		startPosition = sf::Vector2f(400.f, 700.f); // Adjust as needed for level 3
+	}
+	else {
+		startPosition = sf::Vector2f(100.f, 500.f); // Default position if level is unknown
+	}
+
+	spawnPlayer(startPosition);
+}
 
 void GameProject::sRender()
 {
