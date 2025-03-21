@@ -105,6 +105,45 @@ void GameProject::sMovement(sf::Time dt)
 
 void GameProject::sCollisions()
 {
+	if (!_player) return;
+
+	auto& playerTransform = _player->getComponent<CTransform>();
+	auto& playerBox = _player->getComponent<CBoundingBox>();
+
+
+
+	for (auto& barrel : _entityManager.getEntities("Barrel"))
+	{
+		auto& barrelTransform = barrel->getComponent<CTransform>();
+		auto& barrelBox = barrel->getComponent<CBoundingBox>();
+
+		// Define the bounding rectangles
+		sf::FloatRect playerRect(playerTransform.pos.x - playerBox.halfSize.x,
+			playerTransform.pos.y - playerBox.halfSize.y,
+			playerBox.size.x, playerBox.size.y);
+
+		sf::FloatRect barrelRect(barrelTransform.pos.x - barrelBox.halfSize.x,
+			barrelTransform.pos.y - barrelBox.halfSize.y,
+			barrelBox.size.x, barrelBox.size.y);
+
+		if (playerRect.intersects(barrelRect))
+		{
+			// Determine pushback direction
+			sf::Vector2f pushback(0.f, 0.f);
+			if (playerTransform.pos.x < barrelTransform.pos.x)
+				pushback.x = -1;
+			else if (playerTransform.pos.x > barrelTransform.pos.x)
+				pushback.x = 1;
+
+			if (playerTransform.pos.y < barrelTransform.pos.y)
+				pushback.y = -1;
+			else if (playerTransform.pos.y > barrelTransform.pos.y)
+				pushback.y = 1;
+
+			// Move the player back
+			playerTransform.pos += pushback * 5.0f; // Adjust 5.0f as needed
+		}
+	}
 }
 
 void GameProject::sUpdate(sf::Time dt)
@@ -147,6 +186,8 @@ void GameProject::sUpdate(sf::Time dt)
 
 	spawnBone();
 
+	sCollisions();
+
 
 	if (!_player) return; 
 
@@ -162,9 +203,9 @@ void GameProject::sUpdate(sf::Time dt)
 		float distance = std::hypot(playerTransform.pos.x - boneTransform.pos.x,
 			playerTransform.pos.y - boneTransform.pos.y);
 
-		if (distance < 50.0f) // Pickup range threshold
+		if (distance < 50.0f)
 		{
-			bone->destroy(); // Remove the bone
+			bone->destroy(); 
 			SoundPlayer::getInstance().play("Fart"); // Play fart sound
 
 			// Boost player speed for 2 seconds
@@ -178,11 +219,10 @@ void GameProject::sUpdate(sf::Time dt)
 			{
 				auto& sr = Assets::getInstance().getSpriteRec("PR_Fart");
 				playerSprite.sprite.setTexture(Assets::getInstance().getTexture("PR_Fart"));
-				/*playerSprite.setTexture(Assets::getInstance().getTexture(sr.texName));
-				playerSprite.setTextureRec(sr.texRect);*/
+				
 			}
 		}
-		// Only update snow if it's enabled
+		
 		if (_enableSnow) {
 			updateSnowflakes();
 		}
@@ -197,51 +237,51 @@ void GameProject::sUpdate(sf::Time dt)
 			_playerSpeedBoost = false;
 			_speedBoostTimer = 0.0f;
 
-			// Reset speed to normal (instead of setting it to zero)
 			_player->getComponent<CTransform>().vel = normalize(_player->getComponent<CTransform>().vel) * _config.playerSpeed;
-			//_playerSpeedBoost = false;
-			//playerTransform.vel = sf::Vector2f(0.0f, 0.0f); // Reset speed
-
-			// Reset texture to default after farting ends
-			//playerSprite.sprite.setTexture(Assets::getInstance().getTexture("PugRight"));
+			
 			auto& sr = Assets::getInstance().getSpriteRec("PugRight");
 			playerSprite.sprite.setTexture(Assets::getInstance().getTexture(sr.texName));
 			playerSprite.sprite.setTextureRect(sr.texRect);
 		}
 	}
 
+	//for (auto& player : _entityManager.getEntities("player")) {
+	//	auto& playerBox = player->getComponent<CBoundingBox>();
+	//	auto& playerTransform = player->getComponent<CTransform>();
+
+	//	for (auto& barrel : _entityManager.getEntities("barrel")) {
+	//		auto& barrelBox = barrel->getComponent<CBoundingBox>();
+	//		auto& barrelTransform = barrel->getComponent<CTransform>();
+
+	//		// Check if bounding boxes overlap
+	//		sf::FloatRect playerRect(playerTransform.pos.x, playerTransform.pos.y,
+	//			playerBox.size.x, playerBox.size.y);
+	//		sf::FloatRect barrelRect(barrelTransform.pos.x, barrelTransform.pos.y,
+	//			barrelBox.size.x, barrelBox.size.y);
+
+	//		if (playerRect.intersects(barrelRect)) {
+	//			// Basic collision response (prevent movement)
+	//			if (playerTransform.pos.x < barrelTransform.pos.x) {
+	//				playerTransform.pos.x -= 1; // Push back left
+	//			}
+	//			else if (playerTransform.pos.x > barrelTransform.pos.x) {
+	//				playerTransform.pos.x += 1; // Push back right
+	//			}
+	//			if (playerTransform.pos.y < barrelTransform.pos.y) {
+	//				playerTransform.pos.y -= 1; // Push back up
+	//			}
+	//			else if (playerTransform.pos.y > barrelTransform.pos.y) {
+	//				playerTransform.pos.y += 1; // Push back down
+	//			}
+	//		}
+	//	}
+	//}
+
 	
 	//handleBarking();
 
 }
 
-
-
-void GameProject::onEnd()
-{
-}
-
-void GameProject::sSpawnEnemies()
-{
-}
-
-
-
-void GameProject::checkIfDead(sPtrEntt e)
-{
-}
-
-
-
-
-
-void GameProject::destroyOutsideWindow()
-{
-}
-
-void GameProject::spawnEnemy(SpawnPoint sp)
-{
-}
 
 void GameProject::registerActions()
 {
@@ -415,80 +455,26 @@ void GameProject::spawnBarrel()
 		}
 
 		auto barrel = _entityManager.addEntity("Barrel");
+		if (barrel->hasComponent<CSprite>()) {
+			auto& sprite = barrel->getComponent<CSprite>();
+
+			sf::Vector2u textureSize = sprite.sprite.getTexture()->getSize();
+
+			
+			
+		}
+		barrel->addComponent<CBoundingBox>(sf::Vector2f{ 16.f,16.f });
 		barrel->addComponent<CTransform>(sf::Vector2f(x, y));
 		barrel->addComponent<CSprite>(Assets::getInstance().getTexture("Barrel"));
+		/*barrel->addComponent<CCollision>();*/
 		_barrels.push_back(barrel);
 	}
 	_barrelsSpawned = true;
 
-	/*if (_barrelsSpawned) return;
-	int mapWidth = _backgroundImage.getSize().x;
-	int mapHeight = _backgroundImage.getSize().y;
-	
-
-	_barrels.clear();
-	std::uniform_int_distribution<int> distX(0, mapWidth - 1);
-	std::uniform_int_distribution<int> distY(0, mapHeight - 1);
-	
-
-
-
-	for (int i = 0; i < 3; ++i) {
-		bool validSpawn = false;
-		int x, y;
-
-		while (!validSpawn) {
-			x = distX(rng);
-			y = distY(rng);
-			sf::Vector2u imageSize = _backgroundImage.getSize();
-			sf::Vector2u imageSizeB = _backgroundImageBeach.getSize();
-			sf::Vector2u imageSizeS = _backgroundImageSnow.getSize();
-			if (x < imageSize.x && y < imageSize.y) {
-				sf::Color pixelColor = _backgroundImage.getPixel(x, y);
-
-				if (pixelColor.r == 66 && pixelColor.g == 80 && pixelColor.b == 86) {
-					validSpawn = true;
-				}
-			}
-			else if (x < imageSizeB.x && y < imageSizeB.y) {
-				sf::Color pixelColor = _backgroundImageBeach.getPixel(x, y);
-				if (pixelColor.r == 66 && pixelColor.g == 80 && pixelColor.b == 86) {
-					validSpawn = true;
-				}
-			}
-			else if (x < imageSizeS.x && y < imageSizeS.y) {
-				sf::Color pixelColor = _backgroundImageSnow.getPixel(x, y);
-				if (pixelColor.r == 100 && pixelColor.g == 103 && pixelColor.b == 100) {
-					validSpawn = true;
-				}
-			}
-		}
-
-		auto barrel = _entityManager.addEntity("Barrel");
-		barrel->addComponent<CTransform>(sf::Vector2f(x, y));
-		barrel->addComponent<CSprite>(Assets::getInstance().getTexture("Barrel"));
-		_barrels.push_back(barrel);
-	}
-	_barrelsSpawned = true;*/
 	
 	
-	/*if (_barrelsSpawned) return;
-
-	_barrels.clear();
-
-	std::uniform_real_distribution<float> distX(0.0f, 1920.0f); 
-	std::uniform_real_distribution<float> distY(0.0f, 1080.0f);
-
-	for (int i = 0; i < 3; ++i)
-	{
-		auto barrel = _entityManager.addEntity("Barrel");
-		float x = distX(rng);
-		float y = distY(rng);
-		barrel->addComponent<CTransform>(sf::Vector2f(x, y));
-		barrel->addComponent<CSprite>(Assets::getInstance().getTexture("Barrel"));
-		_barrels.push_back(barrel);
-	}
-	_barrelsSpawned = true;*/
+	
+	
 }
 
 void GameProject::spawnBone()
@@ -527,8 +513,7 @@ void GameProject::handleBarking()
 		
 		SoundPlayer::getInstance().play("Explosion1");
 
-		//_barrels.front()->destroy();
-		//_barrels.erase(_barrels.begin()); // Remove from vector
+		
 	}
 }
 
@@ -694,44 +679,24 @@ void GameProject::sDoAction(const Command& command)
 
 
 
-
-
-
-//
-//void GameProject::checkBarkCollision() {
-//	auto& barrels = _entityManager.getEntities("barrel"); // Use correct way to get entities
-//
-//	for (auto& barrel : barrels) {
-//		if (!barrel->isActive()) continue;
-//
-//		// Assuming position is stored in a component like CTransform
-//		if (barrel->hasComponent<CTransform>()) {
-//			auto barrelPos = barrel->getComponent<CTransform>()->pos;
-//			auto playerPos = _player->getComponent<CTransform>()->pos;
-//
-//			float barkRange = 100.0f; // Adjust as needed
-//			if (distance(playerPos, barrelPos) < barkRange) {
-//				barrel->destroy(); // Assuming this method exists
-//			}
-//		}
-//	}
-//}
-//
+void GameProject::onEnd() {
+	// 
+}
 void GameProject::spawnPlayerForLevel()
 {
 	sf::Vector2f startPosition;
 
 	if (_levelPath.find("level1.txt") != std::string::npos) {
-		startPosition = sf::Vector2f(200.f, 500.f); // Adjust as needed for level 1
+		startPosition = sf::Vector2f(646.f, 442.f);
 	}
 	else if (_levelPath.find("level2.txt") != std::string::npos) {
-		startPosition = sf::Vector2f(300.f, 600.f); // Adjust as needed for level 2
+		startPosition = sf::Vector2f(170.f, 706.f); 
 	}
 	else if (_levelPath.find("level3.txt") != std::string::npos) {
-		startPosition = sf::Vector2f(400.f, 700.f); // Adjust as needed for level 3
+		startPosition = sf::Vector2f(184.f, 586.f); 
 	}
 	else {
-		startPosition = sf::Vector2f(100.f, 500.f); // Default position if level is unknown
+		startPosition = sf::Vector2f(100.f, 500.f); 
 	}
 
 	spawnPlayer(startPosition);
