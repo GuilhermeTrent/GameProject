@@ -35,6 +35,73 @@ void initSnowflakes(int count) {
 	}
 }
 
+std::vector<BlockingSquare> obstacles;
+
+void GameProject::generateBlockingSquares()
+{
+    if (_backgroundImage.getSize().x == 0 || _backgroundImage.getSize().y == 0)
+        return;
+
+    std::cout << "Generating Blocking Squares...\n";
+
+    obstacles.clear();
+    unsigned int width = _backgroundImage.getSize().x;
+    unsigned int height = _backgroundImage.getSize().y;
+
+    // Use a step size to reduce computational complexity
+    const int STEP_SIZE = 40;
+    const int BLOCK_SIZE = 80;
+    const int BOUNDARY_OFFSET = 50; // Distance from track edge to start blocking
+
+    // Create a set to store unique blocking positions to avoid duplicates
+    std::set<std::pair<int, int>> blockPositions;
+
+    // Scan the image with larger steps to find track edges more efficiently
+    for (unsigned int y = 0; y < height; y += STEP_SIZE)
+    {
+        for (unsigned int x = 0; x < width; x += STEP_SIZE)
+        {
+            // Check if current pixel is track
+            sf::Color pixelColor = _backgroundImage.getPixel(x, y);
+            if (pixelColor.r == 66 && pixelColor.g == 80 && pixelColor.b == 86)
+            {
+                // Scan around the track pixel for grass
+                for (int dy = -BOUNDARY_OFFSET; dy <= BOUNDARY_OFFSET; dy += BLOCK_SIZE)
+                {
+                    for (int dx = -BOUNDARY_OFFSET; dx <= BOUNDARY_OFFSET; dx += BLOCK_SIZE)
+                    {
+                        int newX = x + dx;
+                        int newY = y + dy;
+
+                        // Boundary check
+                        if (newX >= 0 && newX < width && newY >= 0 && newY < height)
+                        {
+                            sf::Color grassColor = _backgroundImage.getPixel(newX, newY);
+                            
+                            // Check for grass color
+                            if (grassColor.r >= 15 && grassColor.r <= 30 &&
+                                grassColor.g >= 210 && grassColor.g <= 230 &&
+                                grassColor.b >= 20 && grassColor.b <= 35)
+                            {
+                                // Use a set to prevent duplicate blocking squares
+                                blockPositions.insert({newX, newY});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Convert unique block positions to obstacles
+    for (const auto& pos : blockPositions)
+    {
+        obstacles.push_back({pos.first, pos.second, BLOCK_SIZE, BLOCK_SIZE});
+    }
+
+    std::cout << "Track Pixels Found: " << blockPositions.size() << std::endl;
+    std::cout << "Blocking Squares Generated: " << obstacles.size() << std::endl;
+}
 
 
 
@@ -68,6 +135,203 @@ GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 	if (levelPath.find("../level3.txt") != std::string::npos) {
 		_enableSnow = true;
 		initSnowflakes(100); 
+	}
+
+	/*_finishLine = sf::FloatRect(100.f, 50.f, 200.f, 20.f);
+	_checkpoints.push_back({ sf::FloatRect(300.f, 100.f, 50.f, 20.f) });
+	_checkpoints.push_back({ sf::FloatRect(500.f, 300.f, 50.f, 20.f) });*/
+}
+
+void GameProject::setupCheckpoints(const std::string& levelPath)
+{
+	_checkpoints.clear();
+	_currentCheckpoint = 0;
+	_allCheckpointsReached = false;
+
+	// More precise checkpoint placements based on track layout
+	_checkpoints = {
+		{ sf::FloatRect(250.f, 150.f, 50.f, 50.f) },     // First checkpoint near top-left
+		{ sf::FloatRect(800.f, 300.f, 50.f, 50.f) },     // Second checkpoint middle-right
+		{ sf::FloatRect(400.f, 700.f, 50.f, 50.f) }      // Third checkpoint bottom-left
+	};
+
+	// Finish line positioned more precisely
+	_finishLine = sf::FloatRect(50.f, 50.f, 100.f, 50.f);
+
+	// Make checkpoints less visible
+	for (auto& checkpoint : _checkpoints) {
+		checkpoint.area.width = 10.f;  // Make very small
+		checkpoint.area.height = 10.f;
+	}
+
+	//_checkpoints.clear();
+	//_currentCheckpoint = 0;
+	//_allCheckpointsReached = false;
+
+	//// Adjust checkpoint sizes and positions to match the visible track
+	//_checkpoints = {
+	//	{ sf::FloatRect(200.f, 200.f, 200.f, 200.f) },    // First checkpoint
+	//	{ sf::FloatRect(800.f, 350.f, 200.f, 200.f) },    // Second checkpoint
+	//	{ sf::FloatRect(1400.f, 700.f, 200.f, 200.f) }    // Third checkpoint
+	//};
+
+	//// Make finish line more prominent and positioned at the start/end of the track
+	//_finishLine = sf::FloatRect(100.f, 50.f, 200.f, 200.f);
+
+	//// Debug output with precise checkpoint details
+	//for (size_t i = 0; i < _checkpoints.size(); ++i) {
+	//	std::cout << "Checkpoint " << i << " Details:" << std::endl;
+	//	std::cout << "  Position: ("
+	//		<< _checkpoints[i].area.left << ", "
+	//		<< _checkpoints[i].area.top << ")" << std::endl;
+	//	std::cout << "  Size: "
+	//		<< _checkpoints[i].area.width << " x "
+	//		<< _checkpoints[i].area.height << std::endl;
+	//}
+}
+
+void GameProject::resetLapProgress()
+{
+	for (auto& checkpoint : _checkpoints) {
+		checkpoint.reached = false;
+	}
+	_currentCheckpoint = 0;
+	_allCheckpointsReached = false;
+}
+
+void GameProject::checkLapProgress()
+{
+	//if (!_player) return;
+
+	//sf::FloatRect playerBounds = _player->getComponent<CSprite>().sprite.getGlobalBounds();
+
+	//// Extremely verbose debugging
+	//auto& playerTransform = _player->getComponent<CTransform>();
+	//std::cout << "Player Position: ("
+	//	<< playerTransform.pos.x << ", "
+	//	<< playerTransform.pos.y << ")" << std::endl;
+	//std::cout << "Player Bounds: ("
+	//	<< playerBounds.left << ", "
+	//	<< playerBounds.top << ") Size: "
+	//	<< playerBounds.width << " x "
+	//	<< playerBounds.height << std::endl;
+
+	//// Check checkpoints with more logging
+	//for (size_t i = _currentCheckpoint; i < _checkpoints.size(); ++i)
+	//{
+	//	std::cout << "Checking Checkpoint " << i << std::endl;
+	//	std::cout << "  Checkpoint Bounds: ("
+	//		<< _checkpoints[i].area.left << ", "
+	//		<< _checkpoints[i].area.top << ") Size: "
+	//		<< _checkpoints[i].area.width << " x "
+	//		<< _checkpoints[i].area.height << std::endl;
+
+	//	if (playerBounds.intersects(_checkpoints[i].area))
+	//	{
+	//		std::cout << "CHECKPOINT " << i << " REACHED!" << std::endl;
+	//		_checkpoints[i].reached = true;
+	//		_currentCheckpoint = i + 1;
+
+	//		if (_currentCheckpoint >= _checkpoints.size())
+	//		{
+	//			_allCheckpointsReached = true;
+	//			break;
+	//		}
+	//	}
+	//	else {
+	//		std::cout << "No intersection with checkpoint " << i << std::endl;
+	//	}
+
+
+	//}
+
+	//// Check finish line with logging
+	//if (_allCheckpointsReached) {
+	//	std::cout << "All Checkpoints Reached. Checking Finish Line" << std::endl;
+	//	std::cout << "  Finish Line Bounds: ("
+	//		<< _finishLine.left << ", "
+	//		<< _finishLine.top << ") Size: "
+	//		<< _finishLine.width << " x "
+	//		<< _finishLine.height << std::endl;
+
+	//	if (playerBounds.intersects(_finishLine))
+	//	{
+	//		_lastLapTime = _lapTimer.getElapsedTime().asSeconds();
+	//		_lapCount++;
+	//		_lapTimer.restart();
+
+	//		std::cout << "LAP COMPLETED! Lap Time: " << _lastLapTime
+	//			<< "s, Total Laps: " << _lapCount << std::endl;
+
+	//		// Reset for next lap
+	//		_allCheckpointsReached = false;
+	//		_currentCheckpoint = 0;
+	//		for (auto& checkpoint : _checkpoints) {
+	//			checkpoint.reached = false;
+	//		}
+	//	}
+	//}
+	if (!_player) return;
+
+	// Only process if lap hasn't been completed yet
+	if (_lapCount > 0) return;
+
+	sf::FloatRect playerBounds = _player->getComponent<CSprite>().sprite.getGlobalBounds();
+
+	// Check checkpoints more precisely on the track
+	for (size_t i = _currentCheckpoint; i < _checkpoints.size(); ++i)
+	{
+		if (playerBounds.intersects(_checkpoints[i].area))
+		{
+			_checkpoints[i].reached = true;
+			_currentCheckpoint = i + 1;
+
+			if (_currentCheckpoint >= _checkpoints.size())
+			{
+				_allCheckpointsReached = true;
+				break;
+			}
+		}
+	}
+
+	// Race completion and lap timing logic
+	if (_allCheckpointsReached)
+	{
+		if (playerBounds.intersects(_finishLine))
+		{
+			// Record last lap time
+			_lastLapTime = m_raceTime;
+			_lapCount = 1;  // Set to 1 to indicate lap completed
+
+			// Stop the timer
+			m_timerActive = false;
+
+			// Optional: Add game completion logic (pause, show result, etc.)
+			// For example, you might want to pause the game or show a victory screen
+			_isPaused = true;  // Pause the game
+
+			// Optional debug output
+			std::cout << "Lap Completed! Time: " << _lastLapTime << "s" << std::endl;
+		}
+	}
+
+	// Check finish line with race completion logic
+	if (_allCheckpointsReached) {
+		if (playerBounds.intersects(_finishLine))
+		{
+			_lastLapTime = m_raceTime;
+			_lapCount++;
+
+			// Reset for next lap
+			_allCheckpointsReached = false;
+			_currentCheckpoint = 0;
+			for (auto& checkpoint : _checkpoints) {
+				checkpoint.reached = false;
+			}
+
+			// Optional: Add some logging or UI feedback
+			std::cout << "Lap Completed! Time: " << _lastLapTime << "s" << std::endl;
+		}
 	}
 }
 
@@ -146,6 +410,41 @@ void GameProject::sCollisions()
 	}
 }
 
+//void GameProject::checkLapProgress() {
+//	sf::FloatRect playerBounds = _player->getComponent<CSprite>().sprite.getGlobalBounds();
+//
+//	// Check if player reaches the next checkpoint
+//	if (playerBounds.intersects(_checkpoints[_currentCheckpoint].area)) {
+//		_currentCheckpoint++;
+//
+//		// If all checkpoints are passed, check for finish line
+//		if (_currentCheckpoint >= _checkpoints.size()) {
+//			if (playerBounds.intersects(_finishLine)) {
+//				// Lap Completed! Stop Timer
+//				_lastLapTime = _lapTimer.getElapsedTime().asSeconds();
+//				_lapTimer.restart();  // Restart timer for the next lap
+//				_lapCount++;
+//				_currentCheckpoint = 0;  // Reset checkpoint progress
+//
+//				std::cout << "Lap Completed! Lap Time: " << _lastLapTime << "s, Total Laps: " << _lapCount << std::endl;
+//			}
+//		}
+//	}
+//}
+
+//void GameProject::setupCheckpoints() {
+//	_checkpoints.clear();
+//
+//	// Example checkpoint placements
+//	_checkpoints.push_back({ sf::FloatRect(100, 200, 50, 50) });
+//	_checkpoints.push_back({ sf::FloatRect(300, 400, 50, 50) });
+//	_checkpoints.push_back({ sf::FloatRect(500, 600, 50, 50) });
+//
+//	_currentCheckpoint = 0;
+//}
+
+bool wallsCreated = false;
+
 void GameProject::sUpdate(sf::Time dt)
 {
 	if (_isPaused)
@@ -154,10 +453,8 @@ void GameProject::sUpdate(sf::Time dt)
 	SoundPlayer::getInstance().removeStoppedSounds();
 	_entityManager.update();
 
-	
 	_barkText.setString("Barks: " + std::to_string(_barkCounter));
 
-	
 	_barkText.setPosition(
 		_worldView.getCenter().x - _worldView.getSize().x / 2.f + 10.f,
 		_worldView.getCenter().y - _worldView.getSize().y / 2.f + 10.f
@@ -165,29 +462,39 @@ void GameProject::sUpdate(sf::Time dt)
 
 	sMovement(dt);
 	adjustPlayerPosition();
+	
+
 	if (m_countdownTime > 0.0f)
 	{
 		m_countdownTime -= dt.asSeconds();
 		if (m_countdownTime < 0.0f)
 		{
 			m_countdownTime = 0.0f;
-			m_timerActive = true; 
+			m_timerActive = true;
 		}
-		m_countdownText.setString(std::to_string(static_cast<int>(std::ceil(m_countdownTime)))); // Update text
+
+		int countdown = static_cast<int>(std::ceil(m_countdownTime));
+		if (countdown == 3)
+			m_countdownText.setFillColor(sf::Color::Red);
+		else if (countdown == 2)
+			m_countdownText.setFillColor(sf::Color::Yellow);
+		else if (countdown == 1)
+			m_countdownText.setFillColor(sf::Color::Green);
+
+		m_countdownText.setString(std::to_string(countdown));
 	}
 	else if (m_timerActive)
 	{
 		m_raceTime += dt.asSeconds();
-		m_countdownText.setString(""); 
+		m_countdownText.setString("GO!");
+		m_countdownText.setFillColor(sf::Color::Green);
 	}
+
 	annimatePlayer();
-	
 	spawnBarrel();
-
 	spawnBone();
-
 	sCollisions();
-
+	
 
 	if (!_player) return; 
 
@@ -244,6 +551,23 @@ void GameProject::sUpdate(sf::Time dt)
 			playerSprite.sprite.setTextureRect(sr.texRect);
 		}
 	}
+	checkLapProgress();
+	
+
+	//_lapTimer.restart();  // Start timer at the beginning
+
+	//while (_game->window().isOpen()) {
+	//	sf::Event event;
+	//	while (_game->window().pollEvent(event)) {
+	//		if (event.type == sf::Event::Closed)
+	//			_game->window().close();
+	//	}
+
+	//	sUpdate(dt);  // Check for lap progress
+	//	_game->window().clear();
+	//	sRender();  // Draw everything
+	//	_game->window().display();
+	//}
 
 	//for (auto& player : _entityManager.getEntities("player")) {
 	//	auto& playerBox = player->getComponent<CBoundingBox>();
@@ -547,6 +871,7 @@ void GameProject::init(const std::string& levelPath)
 	_backgroundImageBeach = Assets::getInstance().getTexture("Beach").copyToImage();
 	_backgroundImageSnow = Assets::getInstance().getTexture("Snow").copyToImage();
 	loadLevel(levelPath);
+	generateBlockingSquares();
 	registerActions();
 
 	sf::Vector2f spawnPos{ _worldView.getSize().x / 2.f, _worldBounds.height - _worldView.getSize().y / 2.f };
@@ -583,6 +908,13 @@ void GameProject::init(const std::string& levelPath)
 	m_countdownText.setPosition(_worldView.getSize().x / 2.f - 20.f, _worldView.getSize().y / 2.f - 20.f);
 	m_countdownText.setString(std::to_string(static_cast<int>(m_countdownTime))); // Initial display
 
+
+	setupCheckpoints(levelPath);
+
+	
+
+	// Start lap timer
+	_lapTimer.restart();
 	
 	
 }
@@ -609,11 +941,14 @@ void GameProject::loadLevel(const std::string& path)
 
 		auto e = _entityManager.addEntity("bkg");
 
+		/*generateBlockingSquares();*/
+
 		// for background, no textureRect its just the whole texture
 		// and no center origin, position by top left corner
 		auto& sprite = e->addComponent<CSprite>(Assets::getInstance().getTexture(name)).sprite;
 		sprite.setOrigin(0.f, 0.f);
 		sprite.setPosition(pos);
+		
 		}
 		else if (token == "World") {
 			config >> _worldBounds.width >> _worldBounds.height;
@@ -679,6 +1014,8 @@ void GameProject::sDoAction(const Command& command)
 
 
 
+
+
 void GameProject::onEnd() {
 	// 
 }
@@ -702,11 +1039,37 @@ void GameProject::spawnPlayerForLevel()
 	spawnPlayer(startPosition);
 }
 
+//void GameProject::drawTrafficLights(sf::RenderWindow& window)
+//{
+//	sf::CircleShape redLight(50);
+//	sf::CircleShape yellowLight(50);
+//	sf::CircleShape greenLight(50);
+//
+//	redLight.setFillColor(sf::Color(100, 0, 0)); // Dark red by default
+//	yellowLight.setFillColor(sf::Color(100, 100, 0)); // Dark yellow
+//	greenLight.setFillColor(sf::Color(0, 100, 0)); // Dark green
+//
+//	redLight.setPosition(900, 300);
+//	yellowLight.setPosition(900, 400);
+//	greenLight.setPosition(900, 500);
+//
+//	int countdown = static_cast<int>(std::ceil(m_countdownTime));
+//
+//	if (countdown == 3) redLight.setFillColor(sf::Color::Red);
+//	if (countdown == 2) yellowLight.setFillColor(sf::Color::Yellow);
+//	if (countdown == 1) greenLight.setFillColor(sf::Color::Green);
+//
+//	window.draw(redLight);
+//	window.draw(yellowLight);
+//	window.draw(greenLight);
+//}
+
+
 void GameProject::sRender()
 {
 	_game->window().setView(_worldView);
 
-	// draw bkg first
+	// Draw background first
 	for (auto e : _entityManager.getEntities("bkg")) {
 		if (e->getComponent<CSprite>().has) {
 			auto& sprite = e->getComponent<CSprite>().sprite;
@@ -724,6 +1087,7 @@ void GameProject::sRender()
 		sprite.setPosition(tfm.pos);
 		sprite.setRotation(tfm.angle);
 		_game->window().draw(sprite);
+
 		_barkText.setString("Barks: " + std::to_string(_barkCounter));
 		_barkText.setPosition(
 			_game->window().getSize().x - _barkText.getLocalBounds().width - 10,
@@ -743,24 +1107,22 @@ void GameProject::sRender()
 			_game->window().draw(rect);
 		}
 
-		//; >assets().getFont("Arcade");
+		// Render race timer (Time: MM:SS.mmm)
 		sf::Text timerText;
 		timerText.setFont(Assets::getInstance().getFont("main"));
 		timerText.setCharacterSize(50);
 		timerText.setFillColor(sf::Color::White);
 		timerText.setPosition(_game->window().getSize().x / 2 - 50, 50);
+
 		// Format time as MM:SS.mmm (minutes, seconds, milliseconds)
 		int minutes = static_cast<int>(m_raceTime) / 60;
 		int seconds = static_cast<int>(m_raceTime) % 60;
 		int milliseconds = static_cast<int>((m_raceTime - static_cast<int>(m_raceTime)) * 1000);
 
-		
 		std::ostringstream timeStream;
 		timeStream << std::setfill('0') << std::setw(2) << minutes << ":"
 			<< std::setw(2) << seconds << "."
 			<< std::setw(3) << milliseconds;
-
-		
 
 		if (m_countdownTime > 0.0f)
 		{
@@ -768,15 +1130,81 @@ void GameProject::sRender()
 		}
 		else
 		{
-			timerText.setString("Time: " + std::to_string(static_cast<int>(m_raceTime)));
+			timerText.setString("Time: " + timeStream.str());
 		}
-		timerText.setString(timeStream.str()); 
 
 		_game->window().draw(timerText);
-		_game->window().draw(m_countdownText);
+
+		// Render Lap Time
+		sf::Text lapInfoText;
+		lapInfoText.setFont(Assets::getInstance().getFont("main"));
+		lapInfoText.setCharacterSize(24);
+		lapInfoText.setFillColor(sf::Color::White);
+		std::ostringstream lapStream;
+
+		// Only show lap time if a lap has been completed
+		if (_lapCount > 0) {
+			lapStream << "Lap Time: " << std::fixed << std::setprecision(2)
+				<< _lastLapTime << "s";
+		}
+		lapInfoText.setString(lapStream.str());
+		lapInfoText.setPosition(10, 90);  // Position below other UI elements
+		_game->window().draw(lapInfoText);
 	}
-	
+
+	// Draw obstacles
+	sf::RectangleShape blockShape(sf::Vector2f(20, 20)); // Assuming 10x10 block size
+	blockShape.setFillColor(sf::Color::Red); // Make blocks visible
+
+	for (const auto& obstacle : obstacles)
+	{
+		blockShape.setPosition(obstacle.x, obstacle.y);
+		_game->window().draw(blockShape);
+	}
+
+	// Additional rendering code (checkpoints, snow, etc.)
 	if (_enableSnow) {
 		renderSnowflakes(_game->window());
 	}
+
+	sf::RectangleShape checkpointShape;
+	checkpointShape.setFillColor(sf::Color(255, 0, 0, 100)); // Transparent red
+	checkpointShape.setOutlineColor(sf::Color::Red);
+	checkpointShape.setOutlineThickness(2.0f);
+
+	// Render all checkpoints
+	for (const auto& checkpoint : _checkpoints)
+	{
+		checkpointShape.setPosition(checkpoint.area.left, checkpoint.area.top);
+		checkpointShape.setSize(sf::Vector2f(checkpoint.area.width, checkpoint.area.height));
+		_game->window().draw(checkpointShape);
+	}
+
+	// Render finish line
+	sf::RectangleShape finishLineShape;
+	finishLineShape.setFillColor(sf::Color(0, 255, 0, 100)); // Transparent green
+	finishLineShape.setOutlineColor(sf::Color::Green);
+	finishLineShape.setOutlineThickness(2.0f);
+	finishLineShape.setPosition(_finishLine.left, _finishLine.top);
+	finishLineShape.setSize(sf::Vector2f(_finishLine.width, _finishLine.height));
+	_game->window().draw(finishLineShape);
+
+	// Checkpoint marker rendering for debugging
+#ifdef DEBUG_CHECKPOINTS
+	sf::RectangleShape checkpointMarker;
+	checkpointMarker.setFillColor(sf::Color(255, 0, 0, 100)); // Transparent red
+	for (const auto& checkpoint : _checkpoints)
+	{
+		checkpointMarker.setPosition(checkpoint.area.left, checkpoint.area.top);
+		checkpointMarker.setSize(sf::Vector2f(checkpoint.area.width, checkpoint.area.height));
+		_game->window().draw(checkpointMarker);
+	}
+#endif
+
+	
+	
+
+
 }
+
+

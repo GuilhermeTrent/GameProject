@@ -4,6 +4,23 @@
 #include <queue>
 
 
+struct Checkpoint {
+    sf::FloatRect area;
+    bool reached = false;
+};
+
+struct BlockingSquare {
+    int x, y;
+    int width = 10;  // Default size of the blocking square
+    int height = 10;
+
+    // You can add more properties here if needed, like collision flags
+};
+
+extern std::vector<BlockingSquare> obstacles;
+
+
+
 
 struct SpawnPoint {
     std::string type;
@@ -34,6 +51,23 @@ class GameProject : public Scene
     bool                            _drawTextures{ true };
     bool                            _drawAABB{ false };
 
+    sf::Clock _lapTimer;  // Timer to track lap time
+    float _lastLapTime = 0.0f;  // Stores last completed lap time
+    int _lapCount = 0;
+
+    std::vector<Checkpoint> _checkpoints;
+    sf::FloatRect _finishLine;
+    int _currentCheckpoint = 0;
+    bool _allCheckpointsReached = false;
+   // bool _lapCompleted = false;
+    //int _lapCount = 0;
+
+    void checkLapProgress();
+
+    void setupCheckpoints(const std::string& levelPath);
+
+    void resetLapProgress();
+    void generateBlockingSquares();
 
 
     //systems
