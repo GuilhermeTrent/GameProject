@@ -23,6 +23,7 @@
 #include <iostream>
 #include "SplashScreen.h"
 #include "GameEngine.h"
+#include "Scene.h"
 
 
 
@@ -35,7 +36,7 @@ int main()
    
 
     GameEngine game("../config.txt");
-    /*std::shared_ptr<Scene> splashScene = std::make_shared<SplashScreen>(&game);
+   /* std::shared_ptr<Scene> splashScene = std::make_shared<SplashScreen>(&game);
     game.changeScene("Splash", splashScene, true);*/
     game.run();
     return 0;

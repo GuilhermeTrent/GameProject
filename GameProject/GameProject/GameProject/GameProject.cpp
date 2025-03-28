@@ -142,6 +142,34 @@ GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 	_checkpoints.push_back({ sf::FloatRect(500.f, 300.f, 50.f, 20.f) });*/
 }
 
+//void GameProject::checkBarkCollision() {
+//	if (_barrels.empty() || !_player) {
+//		return;
+//	}
+//
+//	std::shared_ptr<Entity> nearestBarrel = nullptr;
+//	float nearestDistance = std::numeric_limits<float>::max();
+//	sf::Vector2f playerPos = _player->getComponent<CTransform>().pos;
+//
+//	for (auto& barrel : _barrels) {
+//		if (!barrel) continue;
+//		sf::Vector2f barrelPos = barrel->getComponent<CTransform>().pos;
+//		float distance = std::hypot(barrelPos.x - playerPos.x, barrelPos.y - playerPos.y);
+//
+//		if (distance < nearestDistance) {
+//			nearestDistance = distance;
+//			nearestBarrel = barrel;
+//		}
+//	}
+//
+//	const float explosionRadius = 50.0f; // Adjust as needed
+//	if (nearestBarrel && nearestDistance <= explosionRadius) {
+//		startAnimation(nearestBarrel, "explode");
+//		_barrels.erase(std::remove(_barrels.begin(), _barrels.end(), nearestBarrel), _barrels.end());
+//	}
+//}
+
+
 void GameProject::setupCheckpoints(const std::string& levelPath)
 {
 	_checkpoints.clear();
@@ -454,6 +482,7 @@ void GameProject::sUpdate(sf::Time dt)
 	_entityManager.update();
 
 	_barkText.setString("Barks: " + std::to_string(_barkCounter));
+	_barkText.setCharacterSize(30);
 
 	_barkText.setPosition(
 		_worldView.getCenter().x - _worldView.getSize().x / 2.f + 10.f,
@@ -462,6 +491,8 @@ void GameProject::sUpdate(sf::Time dt)
 
 	sMovement(dt);
 	adjustPlayerPosition();
+
+	/*checkBarkCollision();*/
 	
 
 	if (m_countdownTime > 0.0f)
@@ -642,7 +673,7 @@ void GameProject::spawnPlayer(sf::Vector2f pos)
 	sprite.setTextureRect(sr.texRect);
 	centerOrigin(sprite);
 
-	_player->addComponent<CBoundingBox>(sf::Vector2f{ 35.f,33.f });
+	_player->addComponent<CBoundingBox>(sf::Vector2f{ 64.f,64.f });
 	_player->addComponent<CState>("straight");
 	_player->addComponent<CInput>();
 }
@@ -787,7 +818,7 @@ void GameProject::spawnBarrel()
 			
 			
 		}
-		barrel->addComponent<CBoundingBox>(sf::Vector2f{ 16.f,16.f });
+		barrel->addComponent<CBoundingBox>(sf::Vector2f{ 64.f,64.f });
 		barrel->addComponent<CTransform>(sf::Vector2f(x, y));
 		barrel->addComponent<CSprite>(Assets::getInstance().getTexture("Barrel"));
 		/*barrel->addComponent<CCollision>();*/
@@ -822,24 +853,102 @@ void GameProject::spawnBone()
 	_bonesSpawned = true;
 }
 
-
-
-
 void GameProject::handleBarking()
 {
-	if (!_barrels.empty())
+	if (!_player || _barrels.empty()) return;
+
+	// Get player position
+	sf::Vector2f playerPos = _player->getComponent<CTransform>().pos;
+
+	// Find the nearest barrel
+	std::shared_ptr<Entity> nearestBarrel = nullptr;
+	float nearestDistance = std::numeric_limits<float>::max();
+
+	for (auto& barrel : _barrels)
 	{
-		
-		auto barrelToRemove = _barrels.back();
-		barrelToRemove->destroy(); 
-		_barrels.pop_back(); 
+		sf::Vector2f barrelPos = barrel->getComponent<CTransform>().pos;
 
-		
-		SoundPlayer::getInstance().play("Explosion1");
+		// Calculate distance between player and barrel using Pythagorean theorem
+		float distance = std::hypot(barrelPos.x - playerPos.x, barrelPos.y - playerPos.y);
 
-		
+		// Update nearest barrel if this is closer
+		if (distance < nearestDistance)
+		{
+			nearestDistance = distance;
+			nearestBarrel = barrel;
+		}
 	}
+
+	// Check if player is close enough (within 50 pixels) and the player presses "E" key
+	float triggerDistance = 150.f;  // Define the threshold distance to trigger explosion
+
+	if (nearestBarrel && nearestDistance <= triggerDistance)
+	{
+		// Check if the player presses the "E" key
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))  // Check for "E" key press
+		{
+			// Remove the nearest barrel from the list
+			auto it = std::find(_barrels.begin(), _barrels.end(), nearestBarrel);
+			if (it != _barrels.end())
+			{
+				_barrels.erase(it);
+			}
+
+			// Destroy the barrel entity
+			nearestBarrel->destroy();
+
+			// Optionally, you can trigger an explosion sound or effect here
+		}
+	}
+
 }
+
+
+
+
+//void GameProject::handleBarking()
+//{
+//	if (!_player || _barrels.empty()) return;
+//
+//	// Get player position
+//	sf::Vector2f playerPos = _player->getComponent<CTransform>().pos;
+//
+//	// Find the nearest barrel
+//	std::shared_ptr<Entity> nearestBarrel = nullptr;
+//	float nearestDistance = std::numeric_limits<float>::max();
+//
+//	for (auto& barrel : _barrels)
+//	{
+//		sf::Vector2f barrelPos = barrel->getComponent<CTransform>().pos;
+//
+//		// Calculate distance between player and barrel using Pythagorean theorem
+//		float distance = std::hypot(barrelPos.x - playerPos.x, barrelPos.y - playerPos.y);
+//
+//		// Update nearest barrel if this is closer
+//		if (distance < nearestDistance)
+//		{
+//			nearestDistance = distance;
+//			nearestBarrel = barrel;
+//		}
+//	}
+//
+//	// If a nearest barrel is found, remove it and play explosion sound
+//	if (nearestBarrel)
+//	{
+//		// Remove the nearest barrel from the list
+//		auto it = std::find(_barrels.begin(), _barrels.end(), nearestBarrel);
+//		if (it != _barrels.end())
+//		{
+//			_barrels.erase(it);
+//		}
+//
+//		// Destroy the barrel entity
+//		nearestBarrel->destroy();
+//
+//		// Play explosion sound
+//		SoundPlayer::getInstance().play("Explosion1");
+//	}
+//}
 
 void GameProject::adjustPlayerPosition()
 {
@@ -876,9 +985,9 @@ void GameProject::init(const std::string& levelPath)
 
 	sf::Vector2f spawnPos{ _worldView.getSize().x / 2.f, _worldBounds.height - _worldView.getSize().y / 2.f };
 
-	_worldView.setCenter(spawnPos);
+	//_worldView.setCenter(spawnPos);
 
-	spawnPlayer(spawnPos);
+	//spawnPlayer(spawnPos);
 
 	
 	initSnowflakes(100);
