@@ -21,13 +21,22 @@
 
 
 #include <iostream>
+#include "SplashScreen.h"
 #include "GameEngine.h"
+
 
 
 
 int main()
 {
+
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "Pug Race - Splash Screen");
+
+   
+
     GameEngine game("../config.txt");
+    /*std::shared_ptr<Scene> splashScene = std::make_shared<SplashScreen>(&game);
+    game.changeScene("Splash", splashScene, true);*/
     game.run();
     return 0;
 }

@@ -14,7 +14,7 @@ struct BlockingSquare {
     int width = 10;  // Default size of the blocking square
     int height = 10;
 
-    // You can add more properties here if needed, like collision flags
+    
 };
 
 extern std::vector<BlockingSquare> obstacles;
