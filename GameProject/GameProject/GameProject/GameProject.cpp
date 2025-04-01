@@ -39,68 +39,68 @@ std::vector<BlockingSquare> obstacles;
 
 void GameProject::generateBlockingSquares()
 {
-    if (_backgroundImage.getSize().x == 0 || _backgroundImage.getSize().y == 0)
-        return;
+	if (_backgroundImage.getSize().x == 0 || _backgroundImage.getSize().y == 0)
+		return;
 
-    std::cout << "Generating Blocking Squares...\n";
+	std::cout << "Generating Blocking Squares...\n";
 
-    obstacles.clear();
-    unsigned int width = _backgroundImage.getSize().x;
-    unsigned int height = _backgroundImage.getSize().y;
+	obstacles.clear();
+	unsigned int width = _backgroundImage.getSize().x;
+	unsigned int height = _backgroundImage.getSize().y;
 
-    // Use a step size to reduce computational complexity
-    const int STEP_SIZE = 40;
-    const int BLOCK_SIZE = 80;
-    const int BOUNDARY_OFFSET = 50; // Distance from track edge to start blocking
+	// Use a step size to reduce computational complexity
+	const int STEP_SIZE = 40;
+	const int BLOCK_SIZE = 80;
+	const int BOUNDARY_OFFSET = 50; // Distance from track edge to start blocking
 
-    // Create a set to store unique blocking positions to avoid duplicates
-    std::set<std::pair<int, int>> blockPositions;
+	// Create a set to store unique blocking positions to avoid duplicates
+	std::set<std::pair<int, int>> blockPositions;
 
-    // Scan the image with larger steps to find track edges more efficiently
-    for (unsigned int y = 0; y < height; y += STEP_SIZE)
-    {
-        for (unsigned int x = 0; x < width; x += STEP_SIZE)
-        {
-            // Check if current pixel is track
-            sf::Color pixelColor = _backgroundImage.getPixel(x, y);
-            if (pixelColor.r == 66 && pixelColor.g == 80 && pixelColor.b == 86)
-            {
-                // Scan around the track pixel for grass
-                for (int dy = -BOUNDARY_OFFSET; dy <= BOUNDARY_OFFSET; dy += BLOCK_SIZE)
-                {
-                    for (int dx = -BOUNDARY_OFFSET; dx <= BOUNDARY_OFFSET; dx += BLOCK_SIZE)
-                    {
-                        int newX = x + dx;
-                        int newY = y + dy;
+	// Scan the image with larger steps to find track edges more efficiently
+	for (unsigned int y = 0; y < height; y += STEP_SIZE)
+	{
+		for (unsigned int x = 0; x < width; x += STEP_SIZE)
+		{
+			// Check if current pixel is track
+			sf::Color pixelColor = _backgroundImage.getPixel(x, y);
+			if (pixelColor.r == 66 && pixelColor.g == 80 && pixelColor.b == 86)
+			{
+				// Scan around the track pixel for grass
+				for (int dy = -BOUNDARY_OFFSET; dy <= BOUNDARY_OFFSET; dy += BLOCK_SIZE)
+				{
+					for (int dx = -BOUNDARY_OFFSET; dx <= BOUNDARY_OFFSET; dx += BLOCK_SIZE)
+					{
+						int newX = x + dx;
+						int newY = y + dy;
 
-                        // Boundary check
-                        if (newX >= 0 && newX < width && newY >= 0 && newY < height)
-                        {
-                            sf::Color grassColor = _backgroundImage.getPixel(newX, newY);
-                            
-                            // Check for grass color
-                            if (grassColor.r >= 15 && grassColor.r <= 30 &&
-                                grassColor.g >= 210 && grassColor.g <= 230 &&
-                                grassColor.b >= 20 && grassColor.b <= 35)
-                            {
-                                // Use a set to prevent duplicate blocking squares
-                                blockPositions.insert({newX, newY});
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+						// Boundary check
+						if (newX >= 0 && newX < width && newY >= 0 && newY < height)
+						{
+							sf::Color grassColor = _backgroundImage.getPixel(newX, newY);
 
-    // Convert unique block positions to obstacles
-    for (const auto& pos : blockPositions)
-    {
-        obstacles.push_back({pos.first, pos.second, BLOCK_SIZE, BLOCK_SIZE});
-    }
+							// Check for grass color
+							if (grassColor.r >= 15 && grassColor.r <= 30 &&
+								grassColor.g >= 210 && grassColor.g <= 230 &&
+								grassColor.b >= 20 && grassColor.b <= 35)
+							{
+								// Use a set to prevent duplicate blocking squares
+								blockPositions.insert({ newX, newY });
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
-    std::cout << "Track Pixels Found: " << blockPositions.size() << std::endl;
-    std::cout << "Blocking Squares Generated: " << obstacles.size() << std::endl;
+	// Convert unique block positions to obstacles
+	for (const auto& pos : blockPositions)
+	{
+		obstacles.push_back({ pos.first, pos.second, BLOCK_SIZE, BLOCK_SIZE });
+	}
+
+	std::cout << "Track Pixels Found: " << blockPositions.size() << std::endl;
+	std::cout << "Blocking Squares Generated: " << obstacles.size() << std::endl;
 }
 
 
@@ -134,7 +134,7 @@ GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 
 	if (levelPath.find("../level3.txt") != std::string::npos) {
 		_enableSnow = true;
-		initSnowflakes(100); 
+		initSnowflakes(100);
 	}
 
 	/*_finishLine = sf::FloatRect(100.f, 50.f, 200.f, 20.f);
@@ -170,6 +170,7 @@ GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 //}
 
 
+
 void GameProject::setupCheckpoints(const std::string& levelPath)
 {
 	_checkpoints.clear();
@@ -178,9 +179,14 @@ void GameProject::setupCheckpoints(const std::string& levelPath)
 
 	// More precise checkpoint placements based on track layout
 	_checkpoints = {
-		{ sf::FloatRect(250.f, 150.f, 50.f, 50.f) },     // First checkpoint near top-left
-		{ sf::FloatRect(800.f, 300.f, 50.f, 50.f) },     // Second checkpoint middle-right
-		{ sf::FloatRect(400.f, 700.f, 50.f, 50.f) }      // Third checkpoint bottom-left
+		//{ sf::FloatRect(250.f, 150.f, 50.f, 50.f) },     // First checkpoint near top-left
+		//{ sf::FloatRect(800.f, 300.f, 50.f, 50.f) },     // Second checkpoint middle-right
+		//{ sf::FloatRect(400.f, 700.f, 50.f, 50.f) }      // Third checkpoint bottom-left
+		{ sf::FloatRect(310.f, 190.f, 50.f, 50.f) },
+		{ sf::FloatRect(1510.f, 230.f, 50.f, 50.f) },
+		{ sf::FloatRect(1069.f, 725.f, 50.f, 50.f) },
+		{ sf::FloatRect(1370.f, 812.f, 50.f, 50.f) },
+		{ sf::FloatRect(290.f, 990.f, 50.f, 50.f) }
 	};
 
 	// Finish line positioned more precisely
@@ -189,7 +195,7 @@ void GameProject::setupCheckpoints(const std::string& levelPath)
 	// Make checkpoints less visible
 	for (auto& checkpoint : _checkpoints) {
 		checkpoint.area.width = 10.f;  // Make very small
-		checkpoint.area.height = 10.f;
+		checkpoint.area.height = 120.f;
 	}
 
 	//_checkpoints.clear();
@@ -217,6 +223,7 @@ void GameProject::setupCheckpoints(const std::string& levelPath)
 	//		<< _checkpoints[i].area.height << std::endl;
 	//}
 }
+
 
 void GameProject::resetLapProgress()
 {
@@ -493,7 +500,7 @@ void GameProject::sUpdate(sf::Time dt)
 	adjustPlayerPosition();
 
 	/*checkBarkCollision();*/
-	
+
 
 	if (m_countdownTime > 0.0f)
 	{
@@ -525,9 +532,9 @@ void GameProject::sUpdate(sf::Time dt)
 	spawnBarrel();
 	spawnBone();
 	sCollisions();
-	
 
-	if (!_player) return; 
+
+	if (!_player) return;
 
 	auto& playerTransform = _player->getComponent<CTransform>();
 	auto& playerSprite = _player->getComponent<CSprite>();
@@ -543,7 +550,7 @@ void GameProject::sUpdate(sf::Time dt)
 
 		if (distance < 50.0f)
 		{
-			bone->destroy(); 
+			bone->destroy();
 			SoundPlayer::getInstance().play("Fart"); // Play fart sound
 
 			// Boost player speed for 2 seconds
@@ -552,15 +559,15 @@ void GameProject::sUpdate(sf::Time dt)
 			playerTransform.vel.x += (playerTransform.vel.x >= 0) ? 100.0f : -100.0f;
 			playerTransform.vel.y += (playerTransform.vel.y >= 0) ? 50.0f : -50.0f;
 
-			
+
 			if (playerTransform.vel.x > 0)
 			{
 				auto& sr = Assets::getInstance().getSpriteRec("PR_Fart");
 				playerSprite.sprite.setTexture(Assets::getInstance().getTexture("PR_Fart"));
-				
+
 			}
 		}
-		
+
 		if (_enableSnow) {
 			updateSnowflakes();
 		}
@@ -576,14 +583,14 @@ void GameProject::sUpdate(sf::Time dt)
 			_speedBoostTimer = 0.0f;
 
 			_player->getComponent<CTransform>().vel = normalize(_player->getComponent<CTransform>().vel) * _config.playerSpeed;
-			
+
 			auto& sr = Assets::getInstance().getSpriteRec("PugRight");
 			playerSprite.sprite.setTexture(Assets::getInstance().getTexture(sr.texName));
 			playerSprite.sprite.setTextureRect(sr.texRect);
 		}
 	}
 	checkLapProgress();
-	
+
 
 	//_lapTimer.restart();  // Start timer at the beginning
 
@@ -632,7 +639,7 @@ void GameProject::sUpdate(sf::Time dt)
 	//	}
 	//}
 
-	
+
 	//handleBarking();
 
 }
@@ -682,7 +689,7 @@ void GameProject::playerMovement()
 {
 	if (!m_timerActive)
 	{
-		
+
 		_player->getComponent<CTransform>().vel = sf::Vector2f(0.f, 0.f);
 		return;
 	}
@@ -702,15 +709,15 @@ void GameProject::playerMovement()
 	unsigned int px = static_cast<unsigned int>(playerPos.x);
 	unsigned int py = static_cast<unsigned int>(playerPos.y);
 
-	
+
 	if (px < imageSize.x && py < imageSize.y) {
 		sf::Color pixelColor = _backgroundImage.getPixel(px, py);
 
 		// Range green
-		if (pixelColor.r >= 15 && pixelColor.r <= 30 &&  
-			pixelColor.g >= 210 && pixelColor.g <= 230 && 
-			pixelColor.b >= 20 && pixelColor.b <= 35) {  
-			playerVel *= 0.5f; 
+		if (pixelColor.r >= 15 && pixelColor.r <= 30 &&
+			pixelColor.g >= 210 && pixelColor.g <= 230 &&
+			pixelColor.b >= 20 && pixelColor.b <= 35) {
+			playerVel *= 0.5f;
 		}
 	}
 	_player->getComponent<CTransform>().vel = playerVel;
@@ -718,7 +725,7 @@ void GameProject::playerMovement()
 
 void GameProject::annimatePlayer()
 {
-	
+
 
 	auto& playerSprite = _player->getComponent<CSprite>().sprite;
 	auto& playerState = _player->getComponent<CState>().state;
@@ -753,8 +760,8 @@ void GameProject::annimatePlayer()
 		playerSprite.setTextureRect(sr.texRect);
 	}
 
-	
-	
+
+
 }
 
 //bool checkCollision(Player player, Barrel barrel) {
@@ -815,8 +822,8 @@ void GameProject::spawnBarrel()
 
 			sf::Vector2u textureSize = sprite.sprite.getTexture()->getSize();
 
-			
-			
+
+
 		}
 		barrel->addComponent<CBoundingBox>(sf::Vector2f{ 64.f,64.f });
 		barrel->addComponent<CTransform>(sf::Vector2f(x, y));
@@ -826,10 +833,10 @@ void GameProject::spawnBarrel()
 	}
 	_barrelsSpawned = true;
 
-	
-	
-	
-	
+
+
+
+
 }
 
 void GameProject::spawnBone()
@@ -838,8 +845,8 @@ void GameProject::spawnBone()
 
 	_bones.clear();
 
-	std::uniform_real_distribution<float> distX(0.0f, 1920.0f); 
-	std::uniform_real_distribution<float> distY(0.0f, 1080.0f);  
+	std::uniform_real_distribution<float> distX(0.0f, 1920.0f);
+	std::uniform_real_distribution<float> distY(0.0f, 1080.0f);
 
 	for (int i = 0; i < 5; ++i)
 	{
@@ -989,9 +996,9 @@ void GameProject::init(const std::string& levelPath)
 
 	//spawnPlayer(spawnPos);
 
-	
+
 	initSnowflakes(100);
-	
+
 
 	MusicPlayer::getInstance().play("gameTheme");
 	MusicPlayer::getInstance().setVolume(5);
@@ -1005,12 +1012,12 @@ void GameProject::init(const std::string& levelPath)
 	m_timerActive = false;
 
 
-	
-	
 
 
 
-	
+
+
+
 	m_countdownText.setFont(Assets::getInstance().getFont("main"));
 	m_countdownText.setCharacterSize(30);
 	m_countdownText.setFillColor(sf::Color::Red);
@@ -1020,12 +1027,12 @@ void GameProject::init(const std::string& levelPath)
 
 	setupCheckpoints(levelPath);
 
-	
+
 
 	// Start lap timer
 	_lapTimer.restart();
-	
-	
+
+
 }
 
 void GameProject::loadLevel(const std::string& path)
@@ -1040,7 +1047,7 @@ void GameProject::loadLevel(const std::string& path)
 
 	std::string token{ "" };
 
-	
+
 	config >> token;
 	while (!config.eof()) {
 		if (token == "Bkg") {
@@ -1048,16 +1055,16 @@ void GameProject::loadLevel(const std::string& path)
 			sf::Vector2f pos;
 			config >> name >> pos.x >> pos.y;
 
-		auto e = _entityManager.addEntity("bkg");
+			auto e = _entityManager.addEntity("bkg");
 
-		/*generateBlockingSquares();*/
+			/*generateBlockingSquares();*/
 
-		// for background, no textureRect its just the whole texture
-		// and no center origin, position by top left corner
-		auto& sprite = e->addComponent<CSprite>(Assets::getInstance().getTexture(name)).sprite;
-		sprite.setOrigin(0.f, 0.f);
-		sprite.setPosition(pos);
-		
+			// for background, no textureRect its just the whole texture
+			// and no center origin, position by top left corner
+			auto& sprite = e->addComponent<CSprite>(Assets::getInstance().getTexture(name)).sprite;
+			sprite.setOrigin(0.f, 0.f);
+			sprite.setPosition(pos);
+
 		}
 		else if (token == "World") {
 			config >> _worldBounds.width >> _worldBounds.height;
@@ -1083,12 +1090,12 @@ void GameProject::sDoAction(const Command& command)
 	if (command.type() == "START") {
 		if (command.name() == "BARK") {
 			if (_barkCounter > 0) {
-				SoundPlayer::getInstance().play("PugBarks"); 
-				_barkCounter-= 1;
+				SoundPlayer::getInstance().play("PugBarks");
+				_barkCounter -= 1;
 				_barkText.setString("Barks: " + std::to_string(_barkCounter));
 				handleBarking();
 			}
-			
+
 
 
 		}
@@ -1136,13 +1143,13 @@ void GameProject::spawnPlayerForLevel()
 		startPosition = sf::Vector2f(646.f, 442.f);
 	}
 	else if (_levelPath.find("level2.txt") != std::string::npos) {
-		startPosition = sf::Vector2f(170.f, 706.f); 
+		startPosition = sf::Vector2f(170.f, 706.f);
 	}
 	else if (_levelPath.find("level3.txt") != std::string::npos) {
-		startPosition = sf::Vector2f(184.f, 586.f); 
+		startPosition = sf::Vector2f(184.f, 586.f);
 	}
 	else {
-		startPosition = sf::Vector2f(100.f, 500.f); 
+		startPosition = sf::Vector2f(100.f, 500.f);
 	}
 
 	spawnPlayer(startPosition);
@@ -1310,10 +1317,8 @@ void GameProject::sRender()
 	}
 #endif
 
-	
-	
+
+
 
 
 }
-
-

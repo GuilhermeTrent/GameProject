@@ -106,6 +106,8 @@ struct CBoundingBox : public Component
     sf::Vector2f size{ 0.f, 0.f };
     sf::Vector2f halfSize{ 0.f, 0.f };
 
+ 
+
     CBoundingBox() = default;
     CBoundingBox(const sf::Vector2f& s) : size(s), halfSize(0.5f * s)
     {}

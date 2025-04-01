@@ -13,9 +13,26 @@ struct BlockingSquare {
     int x, y;
     int width = 10;  // Default size of the blocking square
     int height = 10;
-
+    sf::FloatRect bounds;
     
 };
+
+//struct BlockingSquare {
+//    int x, y;
+//    int width = 10;  // Default size of the blocking square
+//    int height = 10;
+//    CBoundingBox boundingBox;
+//
+//    BlockingSquare(float x, float y, float w, float h)
+//        : x(x), y(y), width(w), height(h), boundingBox(w, h) {}
+//};
+
+//extern std::vector<BlockingSquare> blockingSquares;
+//extern Player player;
+
+void generateBlockingSquares();
+
+
 
 extern std::vector<BlockingSquare> obstacles;
 
@@ -68,6 +85,9 @@ class GameProject : public Scene
 
     void resetLapProgress();
     void generateBlockingSquares();
+    void initializeObstacles();
+    void initializeCheckpoints();
+    void updateUI();
 
 
     //systems
@@ -99,6 +119,8 @@ void startAnimation(sPtrEntt e, std::string animation);
     void                    spawnBarrel();
     void                    handleBarking();
     void                    spawnBone();
+
+  //  std::vector<std::shared_ptr<Entity>> _obstacles;
 
     std::vector<std::shared_ptr<Entity>> _barrels;
     bool _barrelsSpawned = false;
