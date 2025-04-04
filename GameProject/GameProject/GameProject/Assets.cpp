@@ -92,6 +92,10 @@ const AnimationRec& Assets::getAnimationRec(const std::string& name) const
     return _animationRecs.at(name);
 }
 
+const Animation& Assets::getAnimation(const std::string& name) const {
+    return _animationMap.at(name);
+}
+
 
 
 void Assets::loadFonts(const std::string& path)

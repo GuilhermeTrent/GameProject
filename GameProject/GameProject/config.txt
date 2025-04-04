@@ -22,6 +22,7 @@ Texture PugRight ../assets/Textures/pug_right.png
 Texture Bone     ../assets/Textures/bone.png
 Texture PR_Fart ../assets/Textures/pug_right_farting.png
 Texture MenuBackground ../assets/Textures/resting.jpg
+Texture Explosion ../assets/Textures/Entities.png
 
 
 #
@@ -40,14 +41,16 @@ Sprite  PugDown        PugDown  1   1  64   64
 Sprite PugUp          PugUp    1   1  64   64
 Sprite PugLeft        PugLeft  1   1  64   64
 Sprite PugRight       PugRight 1   1  64   64
-Sprite Barrel         Barrel   1   1   64   64
+Sprite Barrel         Barrel   1   1   40   40
 Sprite Bone		Bone   1   1   64   64
 Sprite PR_Fart		PR_Fart   1   1   40  40 
 Sprite MenuBackground   MenuBackground  1   1   1920  1080
 
-#
-#  Animation    Name            Texture     Speed   Repeats
+JSON                ../assets/Textures/Entities.json
 
+#
+# Animations   name         texture    Width Height numbFrames duration  repeats (0/1)
+Animation      Explosion    Explosion  256   256    16          1           0
 
 
 

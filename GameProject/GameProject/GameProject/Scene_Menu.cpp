@@ -1,6 +1,7 @@
 #include "Scene_Menu.h"
 #include "GameProject.h"
 #include "MusicPlayer.h"
+#include "SplashScreen.h"
 #include <memory>
 
 void Scene_Menu::onEnd()
@@ -117,6 +118,10 @@ void Scene_Menu::sDoAction(const Command& action)
 		{
 			_game->changeScene("PLAY", std::make_shared<GameProject>(_game, m_levelPaths[m_menuIndex]));
 		}
+		/*else if (action.name() == "SPLASH")
+		{
+			_game->changeScene("SPLASH", std::make_shared<SplashScreen>(_game));
+		}*/
 		else if (action.name() == "QUIT")
 		{
 			onEnd();

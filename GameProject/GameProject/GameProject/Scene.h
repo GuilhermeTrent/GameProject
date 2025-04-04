@@ -30,6 +30,8 @@ public:
 	Scene(GameEngine* gameEngine);
 	virtual ~Scene();
 
+	//virtual void handleInput(sf::Event event) = 0;
+
 	virtual void		update(sf::Time dt) = 0;
 	virtual void		sDoAction(const Command& action) = 0;
 	virtual void		sRender() = 0;

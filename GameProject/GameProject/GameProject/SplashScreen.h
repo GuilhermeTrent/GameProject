@@ -5,21 +5,26 @@
 #include "Scene.h"
 #include "GameProject.h"
 
-class SplashScreen : public Scene{
+class SplashScreen : public Scene {
 private:
-    sf::Text _titleText;
-    sf::Text _descriptionText;
-    sf::Clock _timer;
-    float _displayDuration = 3.0f; // Time before switching to menu
-
-    float _elapsedTime;
     sf::Text _splashText;
+    sf::Text _continueText;
+    bool _readyToTransition;
+    float _elapsedTime;
 
+    
+    float _textPulseTime;
+    const float _pulseRate = 0.8f; // How fast the text pulses
 
 public:
     SplashScreen(GameEngine* gameEngine);
     void sRender() override;
     void update(sf::Time dt) override;
+    void sDoAction(const Command& action) override;
+    void init();
+
+    
+    void onEnd() override {}  
 };
 
 #endif // SPLASHSCREEN_H

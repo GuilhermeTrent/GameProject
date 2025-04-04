@@ -10,12 +10,18 @@ struct Checkpoint {
 };
 
 struct BlockingSquare {
-    int x, y;
-    int width = 10;  // Default size of the blocking square
-    int height = 10;
-    sf::FloatRect bounds;
+    //int x, y;
+    //int width = 10;  // Default size of the blocking square
+    //int height = 10;
+    //sf::FloatRect bounds;
+
+    int x;
+    int y;
+    int width;
+    int height;
     
 };
+
 
 //struct BlockingSquare {
 //    int x, y;
@@ -36,6 +42,10 @@ void generateBlockingSquares();
 
 extern std::vector<BlockingSquare> obstacles;
 
+struct PlayerRecord {
+    float lapTime;
+    std::string playerName;
+};
 
 
 
@@ -119,6 +129,7 @@ void startAnimation(sPtrEntt e, std::string animation);
     void                    spawnBarrel();
     void                    handleBarking();
     void                    spawnBone();
+    void                    determineWinner();
 
   //  std::vector<std::shared_ptr<Entity>> _obstacles;
 
@@ -129,10 +140,10 @@ void startAnimation(sPtrEntt e, std::string animation);
     bool _bonesSpawned = false;
 
     float m_countdownTime = 3.0f; // Countdown before race starts
-    float m_raceTime = 0.0f;      // Race time after countdown
+    float m_raceTime = 10.0f;      // Race time after countdown
     bool m_timerActive = false;   // Track when the race is ongoing
 
-    sf::Text _timerText;
+    //sf::Text _timerText;
     sf::Text m_countdownText;
     std::shared_ptr<Entity> _backgroundEntity;
     sf::Image _backgroundImage;
@@ -142,6 +153,33 @@ void startAnimation(sPtrEntt e, std::string animation);
     bool _playerSpeedBoost = false;
     float _speedBoostTimer = 0.0f;
     float _deltaTime = 0.016f; 
+
+private:
+    bool _showTimeBonus = false;
+    float _timeBonusDisplayTime = 0.0f;
+    float _lastTimeBonus = 0.0f;
+
+private:
+    sf::Font _uiFont;                // Custom font for UI elements
+    sf::Text _timerText;             // Race timer display
+    sf::Text _countdownText;         // Countdown display
+    sf::Text _lapInfoText;           // Lap time information
+    sf::RectangleShape _uiBackground;// Background for UI elements
+    sf::Texture _barkIconTexture;    // Texture for bark icon
+    sf::Sprite _barkIcon;            // Sprite for bark icon
+
+    float m_startTime = 10.0f;  // 10 seconds countdown at the start of the race
+    bool m_raceStarted = false;
+
+    void initUI();
+
+  
+    float m_raceTimeRemaining = 10.0f; // Starts with 10 seconds
+    //bool m_timerActive = false; // Controls if the race timer is running
+    //float _restartTimer = 0.0f; // Timer for restarting the race
+
+    void endRace(); // Function to handle race ending
+    void restartRace(); // Function to restart the race
 
 private:
     bool _enableSnow = false;
@@ -168,5 +206,8 @@ public:
     int _barkCounter = 2;
 
     bool canBark() const { return _barkCounter > 0; }*/
+
+    
+
 };
 
