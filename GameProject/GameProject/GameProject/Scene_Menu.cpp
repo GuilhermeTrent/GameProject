@@ -19,8 +19,7 @@ Scene_Menu::Scene_Menu(GameEngine* gameEngine)
 
 void Scene_Menu::init()
 {
-	MusicPlayer::getInstance().play("menuTheme");
-	MusicPlayer::getInstance().setVolume(5);
+
 
 	registerAction(sf::Keyboard::W, "UP");
 	registerAction(sf::Keyboard::Up, "UP");
@@ -29,7 +28,7 @@ void Scene_Menu::init()
 	registerAction(sf::Keyboard::D, "PLAY");
 	registerAction(sf::Keyboard::Escape, "QUIT");
 
-	m_title = "How    I    train    my    Pug";
+	m_title = "PUG GRAND PRIX";
 	m_menuStrings.push_back("Level 1");
 	m_menuStrings.push_back("Level 2");
 	m_menuStrings.push_back("Level 3");
@@ -59,24 +58,24 @@ void Scene_Menu::sRender()
 	view.setCenter(_game->window().getSize().x / 2.f, _game->window().getSize().y / 2.f);
 	_game->window().setView(view);
 
-	
+
 	sf::Sprite backgroundSprite;
-	backgroundSprite.setTexture(Assets::getInstance().getTexture("MenuBackground")); 
-	backgroundSprite.setPosition(0, 0); 
+	backgroundSprite.setTexture(Assets::getInstance().getTexture("MenuBackground"));
+	backgroundSprite.setPosition(0, 0);
 	backgroundSprite.setScale(
 		_game->window().getSize().x / backgroundSprite.getLocalBounds().width,
 		_game->window().getSize().y / backgroundSprite.getLocalBounds().height
 	);
 
-	
+
 	_game->window().draw(backgroundSprite);
 
-	
+
 	static const sf::Color selectedColor(255, 255, 255);
 	static const sf::Color normalColor(0, 0, 0);
 
 	// Footer text
-	sf::Text footer("Game Controls  UP: W    DOWN: S  LEFT: A     RIGHT: D    QUIT: Q    BARK: E",
+	sf::Text footer("Game Controls  \nUP: W    \nDOWN: S  \nLEFT: A     \nRIGHT: D    \nQUIT: Q    \nBARK: E",
 		Assets::getInstance().getFont("Arial"), 20);
 	footer.setFillColor(normalColor);
 	footer.setPosition(32, 700);

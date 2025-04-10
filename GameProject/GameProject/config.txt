@@ -5,9 +5,15 @@ Window  1920 1080
 Font    Arial      	../assets/fonts/arial.ttf
 Font    main       	../assets/fonts/Sansation.ttf
 Font    Arcade    	../assets/fonts/arcadeclassic.regular.ttf
+Font	Roboto		../assets/fonts/Roboto-Regular.ttf
+Font	Press		../assets/fonts/PressStart2P-Regular.ttf
+Font 	Audiowide	../assets/fonts/Audiowide-Regular.ttf
 
-Music menuTheme     ../assets/Music/dp_frogger.flac
-Music gameTheme  ../assets/Music/dp_frogger_tweener.flac
+Music menuTheme2     ../assets/Music/dp_frogger.flac
+Music gameTheme2  ../assets/Music/dp_frogger_tweener.flac
+Music gameTheme   ../assets/Music/byte-blast.mp3
+Music menuTheme   ../assets/Music/retrorace.mp3
+Music Countdown     ../assets/Music/arcade-countdown.mp3
 
 # Textures
 Texture Pug      ../assets/Textures/pug_testing.png
@@ -34,6 +40,9 @@ Sound Explosion1    ../assets/Sound/Explosion1.wav
 Sound Explosion2    ../assets/Sound/Explosion2.wav
 Sound Fart          ../assets/Sound/fart.wav
 
+Sound GameOver      ../assets/Sound/game-over.mp3
+Sound Checkpoint    ../assets/Sound/game-bonus.mp3
+
 # Sprites
 Sprite background      Park    1   1  1920  1080
 Sprite playerPug       Pug      1   1  64   64
@@ -41,7 +50,7 @@ Sprite  PugDown        PugDown  1   1  64   64
 Sprite PugUp          PugUp    1   1  64   64
 Sprite PugLeft        PugLeft  1   1  64   64
 Sprite PugRight       PugRight 1   1  64   64
-Sprite Barrel         Barrel   1   1   40   40
+Sprite Barrel         Barrel   1   1   50   50
 Sprite Bone		Bone   1   1   64   64
 Sprite PR_Fart		PR_Fart   1   1   40  40 
 Sprite MenuBackground   MenuBackground  1   1   1920  1080

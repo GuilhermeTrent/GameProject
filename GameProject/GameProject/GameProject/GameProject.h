@@ -19,7 +19,7 @@ struct BlockingSquare {
     int y;
     int width;
     int height;
-    
+
 };
 
 
@@ -65,7 +65,7 @@ struct LevelConfig {
 
 class GameProject : public Scene
 {
-    GameEngine*                      m_game;
+    GameEngine* m_game;
     sPtrEntt                        _player{ nullptr };
     sf::View                        _worldView;
     sf::FloatRect                   _worldBounds;
@@ -86,8 +86,8 @@ class GameProject : public Scene
     sf::FloatRect _finishLine;
     int _currentCheckpoint = 0;
     bool _allCheckpointsReached = false;
-   // bool _lapCompleted = false;
-    //int _lapCount = 0;
+    // bool _lapCompleted = false;
+     //int _lapCount = 0;
 
     void checkLapProgress();
 
@@ -98,7 +98,7 @@ class GameProject : public Scene
     void initializeObstacles();
     void initializeCheckpoints();
     void updateUI();
-
+    void resetRaceState();
 
     //systems
     void                    sAnimation(sf::Time dt);
@@ -109,11 +109,13 @@ class GameProject : public Scene
     void                    sSpawnEnemies();
     void                    onBark();
 
+
+
     // helper functions
 //  //  void spawnBarrels();
-void checkBarkCollision();
-void startAnimation(sPtrEntt e, std::string animation);
-   // void                    startAnimation(sPtrEntt e, std::string animation);
+    void checkBarkCollision();
+    void startAnimation(sPtrEntt e, std::string animation);
+    // void                    startAnimation(sPtrEntt e, std::string animation);
     void                    checkIfDead(sPtrEntt e);
     void                    checkPlayerCollision();
     void                    destroyOutsideWindow();
@@ -131,7 +133,7 @@ void startAnimation(sPtrEntt e, std::string animation);
     void                    spawnBone();
     void                    determineWinner();
 
-  //  std::vector<std::shared_ptr<Entity>> _obstacles;
+    //  std::vector<std::shared_ptr<Entity>> _obstacles;
 
     std::vector<std::shared_ptr<Entity>> _barrels;
     bool _barrelsSpawned = false;
@@ -152,12 +154,14 @@ void startAnimation(sPtrEntt e, std::string animation);
 
     bool _playerSpeedBoost = false;
     float _speedBoostTimer = 0.0f;
-    float _deltaTime = 0.016f; 
+    float _deltaTime = 0.016f;
 
 private:
     bool _showTimeBonus = false;
     float _timeBonusDisplayTime = 0.0f;
     float _lastTimeBonus = 0.0f;
+    float m_goDisplayTime = 0.0f;
+    float m_prevCountdownTime = 1.0f;
 
 private:
     sf::Font _uiFont;                // Custom font for UI elements
@@ -173,7 +177,7 @@ private:
 
     void initUI();
 
-  
+
     float m_raceTimeRemaining = 10.0f; // Starts with 10 seconds
     //bool m_timerActive = false; // Controls if the race timer is running
     //float _restartTimer = 0.0f; // Timer for restarting the race
@@ -184,30 +188,30 @@ private:
 private:
     bool _enableSnow = false;
     std::string _levelPath;
-//    sf::Text _barkText;        
-//    sf::Font _barkFont;           
-//    int _barkCounter = 2;   
-//
+    //    sf::Text _barkText;        
+    //    sf::Font _barkFont;           
+    //    int _barkCounter = 2;   
+    //
     bool canBark() const { return _barkCounter > 0; }
-  
+
 
 public:
     GameProject(GameEngine* gameEngine, const std::string& levelPath);
 
-    
+
 
     void		            update(sf::Time dt) override;
     void		            sDoAction(const Command& command) override;
     void		            sRender() override;
     void spawnPlayerForLevel();
 
-   /* sf::Text _barkText;
-    sf::Font _barkFont;
-    int _barkCounter = 2;
+    /* sf::Text _barkText;
+     sf::Font _barkFont;
+     int _barkCounter = 2;
 
-    bool canBark() const { return _barkCounter > 0; }*/
+     bool canBark() const { return _barkCounter > 0; }*/
 
-    
+
 
 };
 

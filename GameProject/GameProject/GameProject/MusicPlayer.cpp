@@ -7,8 +7,9 @@
 
 
 MusicPlayer::MusicPlayer() {
-    m_filenames["menuTheme"] = "../assets/Music/dp_frogger.flac";
-    m_filenames["gameTheme"] = "../assets/Music/dp_frogger_tweener.flac";
+    m_filenames["menuTheme"] = "../assets/Music/retrorace.mp3";
+    m_filenames["gameTheme"] = "../assets/Music/byte-blast.mp3";
+    m_filenames["Countdown"] = "../assets/Music/arcade-countdown.mp3";
 }
 
 void MusicPlayer::addSong(const std::string& name, const std::string& path) {

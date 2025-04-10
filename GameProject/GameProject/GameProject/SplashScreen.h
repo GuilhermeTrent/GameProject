@@ -1,30 +1,37 @@
-#ifndef SPLASHSCREEN_H
-#define SPLASHSCREEN_H
+// SplashScreen.h
+#pragma once
 
-#include <SFML/Graphics.hpp>
 #include "Scene.h"
-#include "GameProject.h"
+#include <SFML/Graphics.hpp>
 
-class SplashScreen : public Scene {
-private:
-    sf::Text _splashText;
-    sf::Text _continueText;
-    bool _readyToTransition;
-    float _elapsedTime;
-
-    
-    float _textPulseTime;
-    const float _pulseRate = 0.8f; // How fast the text pulses
-
+class SplashScreen : public Scene
+{
 public:
     SplashScreen(GameEngine* gameEngine);
-    void sRender() override;
-    void update(sf::Time dt) override;
-    void sDoAction(const Command& action) override;
     void init();
+    void update(sf::Time dt) override;
+    void sRender() override;
+    void sDoAction(const Command& action) override;
 
-    
-    void onEnd() override {}  
+private:
+    // Timing properties
+    float _elapsedTime;
+    float _textPulseTime;
+    float _pulseRate;
+    bool _readyToTransition;
+
+    // Graphics resources
+    sf::Text _mainFont;
+
+    // UI elements
+    sf::RectangleShape _background;
+    sf::RectangleShape _controlsPanel;
+    sf::Text _titleText;
+    sf::Text _taglineText;
+    sf::Text _controlsTitle;
+    sf::Text _controlsText;
+    sf::Text _storyText;
+    sf::Text _continueText;
+
+    void onEnd() override {};
 };
-
-#endif // SPLASHSCREEN_H

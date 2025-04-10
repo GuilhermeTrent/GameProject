@@ -34,6 +34,8 @@ public:
         _frameDeltaTime = dt;
     }
 
+    
+
     void                    init(const std::string& path);
     void                    update();
     void                    sUserInput();

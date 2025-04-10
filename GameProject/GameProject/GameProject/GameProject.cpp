@@ -59,17 +59,17 @@ void GameProject::generateBlockingSquares()
 	unsigned int width = _backgroundImage.getSize().x;
 	unsigned int height = _backgroundImage.getSize().y;
 
-	// Use a step size to reduce computational complexity
+
 	const int STEP_SIZE = 40;
 	const int BLOCK_SIZE = 40; // Original block size
 	const int COLLISION_SIZE = 16; // Smaller collision size
 	const int BOUNDARY_OFFSET = 100; // Increased from 50 to 120 - allows more space between track and obstacles
 	const int GRASS_MARGIN = 120; // How much grass area to leave accessible
 
-	// Create a set to store unique blocking positions to avoid duplicates
+
 	std::set<std::pair<int, int>> blockPositions;
 
-	// Scan the image with larger steps to find track edges more efficiently
+
 	for (unsigned int y = 0; y < height; y += STEP_SIZE)
 	{
 		for (unsigned int x = 0; x < width; x += STEP_SIZE)
@@ -165,7 +165,41 @@ GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 }
 
 
-
+//void GameProject::resetForPlayer2()
+//{
+//	// Reset barrels
+//	_barrelsSpawned = false;
+//	for (auto& barrel : _barrels) {
+//		if (barrel && barrel->isActive()) {
+//			barrel->destroy();
+//		}
+//	}
+//	_barrels.clear();
+//
+//	// Reset bones
+//	_bonesSpawned = false;
+//	for (auto& bone : _bones) {
+//		if (bone && bone->isActive()) {
+//			bone->destroy();
+//		}
+//	}
+//	_bones.clear();
+//
+//	// Reset bark counter
+//	_barkCounter = 0;
+//
+//	// Reset race timer
+//	m_countdownTime = 3.0f;
+//	m_timerActive = false;
+//	m_raceTime = 50.0f;  // Same as Player 1
+//
+//	// Reset lap progress
+//	resetLapProgress();
+//
+//	// Reset player state
+//	_playerSpeedBoost = false;
+//	_speedBoostTimer = 0.0f;
+//}
 
 
 void GameProject::setupCheckpoints(const std::string& levelPath)
@@ -177,22 +211,22 @@ void GameProject::setupCheckpoints(const std::string& levelPath)
 	// More precise checkpoint placements based on track layout
 	// Let's make them more visible for debugging
 	_checkpoints = {
-		{ sf::FloatRect(310.f, 150.f, 50.f, 50.f) },
-		{ sf::FloatRect(1510.f, 200.f, 50.f, 50.f) },
-		{ sf::FloatRect(1370.f, 720.f, 50.f, 50.f) },
-		{ sf::FloatRect(290.f, 940.f, 50.f, 50.f) },
-		{ sf::FloatRect(1069.f, 650.f, 50.f, 50.f) }
-		
-		
+		{ sf::FloatRect(310.f, 100.f, 100.f, 100.f) },
+		{ sf::FloatRect(1510.f, 200.f, 100.f, 100.f) },
+		{ sf::FloatRect(1370.f, 720.f, 100.f, 100.f) },
+		{ sf::FloatRect(290.f, 940.f, 100.f, 100.f) },
+		{ sf::FloatRect(1069.f, 650.f, 100.f, 100.f) }
+
+
 	};
 
 	// Make finish line more visible
-	_finishLine = sf::FloatRect(646.f, 400.f, 100.f, 100.f);
+	_finishLine = sf::FloatRect(610.f, 400.f, 75.f, 100.f);
 
 	// For debugging, make checkpoints more visible
 	for (auto& checkpoint : _checkpoints) {
 		checkpoint.area.width = 50.f;  // Make larger for debugging
-		checkpoint.area.height = 120.f;
+		checkpoint.area.height = 200.f;
 	}
 
 	std::cout << "Checkpoints and finish line set up. Total checkpoints: " << _checkpoints.size() << std::endl;
@@ -211,7 +245,7 @@ void GameProject::resetLapProgress()
 	m_countdownTime = 3.0f; // 3-second countdown
 	m_timerActive = false;
 	m_raceTime = 10.0f; // Reset race time
-	_lapCount = 0; 
+	_lapCount = 0;
 }
 
 
@@ -255,7 +289,7 @@ void GameProject::checkLapProgress()
 		// Check checkpoints in sequence
 		if (_currentCheckpoint < _checkpoints.size() &&
 			playerBounds.intersects(_checkpoints[_currentCheckpoint].area)) {
-
+			SoundPlayer::getInstance().play("Checkpoint");
 			std::cout << "Checkpoint " << _currentCheckpoint + 1 << " reached!" << std::endl;
 			_checkpoints[_currentCheckpoint].reached = true;
 
@@ -337,7 +371,7 @@ void GameProject::checkLapProgress()
 					spawnBarrel();
 					spawnBone();
 					_barkCounter = 2;
-					
+
 				}
 				else {
 					// Both players finished, show winner
@@ -358,6 +392,41 @@ void GameProject::checkLapProgress()
 
 }
 
+void GameProject::resetRaceState()
+{
+	// Clear all barrels and bones
+	for (auto& barrel : _barrels) {
+		if (barrel->isActive()) barrel->destroy();
+	}
+	for (auto& bone : _bones) {
+		if (bone->isActive()) bone->destroy();
+	}
+	_barrels.clear();
+	_bones.clear();
+	_barrelsSpawned = false;
+	_bonesSpawned = false;
+
+	// Reset bark count
+	_barkCounter = 2;
+
+	// Reset timer
+	m_raceTime = 50.0f;
+	m_timerActive = false;
+
+	// Reset speed boost
+	_playerSpeedBoost = false;
+	_speedBoostTimer = 0.0f;
+
+	// Clear any remaining effects
+	if (_player && _player->hasComponent<CSprite>()) {
+		auto& playerSprite = _player->getComponent<CSprite>();
+		auto& sr = Assets::getInstance().getSpriteRec("PugLeft");
+		playerSprite.sprite.setTexture(Assets::getInstance().getTexture(sr.texName));
+		playerSprite.sprite.setTextureRect(sr.texRect);
+	}
+}
+
+
 // Add these declarations to your GameProject.h file in the private section:
 /*
 private:
@@ -374,74 +443,74 @@ private:
 
 void GameProject::sAnimation(sf::Time dt)
 {
-	
-		for (auto e : _entityManager.getEntities()) {
-			if (!e->hasComponent<CAnimation>()) continue;
 
-			auto& anim = e->getComponent<CAnimation>();
-			anim.countDown -= dt;
+	for (auto e : _entityManager.getEntities()) {
+		if (!e->hasComponent<CAnimation>()) continue;
 
-			std::cout << "Countdown: " << anim.countDown.asSeconds() << " seconds\n";
+		auto& anim = e->getComponent<CAnimation>();
+		anim.countDown -= dt;
 
-			if (anim.countDown.asSeconds() <= 0) {
-				anim.currentFrame++;
-				anim.countDown = anim.timePerFrame; // Reset timer
+		std::cout << "Countdown: " << anim.countDown.asSeconds() << " seconds\n";
 
-				std::cout << "Current Frame: " << anim.currentFrame
-					<< " / " << anim.numbFrames << "\n";
+		if (anim.countDown.asSeconds() <= 0) {
+			anim.currentFrame++;
+			anim.countDown = anim.timePerFrame; // Reset timer
 
-				if (anim.currentFrame >= anim.numbFrames) {
-					if (anim.isRepeat) {
-						anim.currentFrame = 0;
-					}
-					else {
-						e->destroy();
-						continue;
-					}
+			std::cout << "Current Frame: " << anim.currentFrame
+				<< " / " << anim.numbFrames << "\n";
+
+			if (anim.currentFrame >= anim.numbFrames) {
+				if (anim.isRepeat) {
+					anim.currentFrame = 0;
 				}
-
-				auto& sprite = e->getComponent<CSprite>().sprite;
-				sprite.setTextureRect(sf::IntRect(
-					anim.currentFrame * anim.frameSize.x, 0,
-					anim.frameSize.x, anim.frameSize.y
-				));
-
-				std::cout << "Setting TextureRect: ("
-					<< anim.currentFrame * anim.frameSize.x << ", 0, "
-					<< anim.frameSize.x << ", " << anim.frameSize.y << ")\n";
+				else {
+					e->destroy();
+					continue;
+				}
 			}
+
+			auto& sprite = e->getComponent<CSprite>().sprite;
+			sprite.setTextureRect(sf::IntRect(
+				anim.currentFrame * anim.frameSize.x, 0,
+				anim.frameSize.x, anim.frameSize.y
+			));
+
+			std::cout << "Setting TextureRect: ("
+				<< anim.currentFrame * anim.frameSize.x << ", 0, "
+				<< anim.frameSize.x << ", " << anim.frameSize.y << ")\n";
 		}
 	}
+}
 
-	//for (auto e : _entityManager.getEntities()) {
-	//	if (e->hasComponent<CAnimation>()) {
-	//		auto& anim = e->getComponent<CAnimation>();
-	//		anim.countDown -= dt; // Correct way to subtract sf::Time
+//for (auto e : _entityManager.getEntities()) {
+//	if (e->hasComponent<CAnimation>()) {
+//		auto& anim = e->getComponent<CAnimation>();
+//		anim.countDown -= dt; // Correct way to subtract sf::Time
 
 
 
-	//		if (anim.countDown <= sf::Time::Zero) {
-	//			anim.currentFrame++;
-	//			anim.countDown = anim.timePerFrame;
+//		if (anim.countDown <= sf::Time::Zero) {
+//			anim.currentFrame++;
+//			anim.countDown = anim.timePerFrame;
 
-	//			if (anim.currentFrame >= anim.numbFrames) {
-	//				if (anim.isRepeat) {
-	//					anim.currentFrame = 0;
-	//				}
-	//				else {
-	//					e->destroy();  // Destroy explosion after animation ends
-	//					continue;
-	//				}
-	//			}
+//			if (anim.currentFrame >= anim.numbFrames) {
+//				if (anim.isRepeat) {
+//					anim.currentFrame = 0;
+//				}
+//				else {
+//					e->destroy();  // Destroy explosion after animation ends
+//					continue;
+//				}
+//			}
 
-	//			auto& sprite = e->getComponent<CSprite>().sprite;
-	//			sprite.setTextureRect(sf::IntRect(
-	//				anim.currentFrame * anim.frameSize.x, 0,
-	//				anim.frameSize.x, anim.frameSize.y
-	//			));
-	//		}
-	//	}
-	//}
+//			auto& sprite = e->getComponent<CSprite>().sprite;
+//			sprite.setTextureRect(sf::IntRect(
+//				anim.currentFrame * anim.frameSize.x, 0,
+//				anim.frameSize.x, anim.frameSize.y
+//			));
+//		}
+//	}
+//}
 
 
 
@@ -513,7 +582,7 @@ void GameProject::sCollisions()
 			// Determine collision side and pushback direction
 			sf::Vector2f pushback(0.f, 0.f);
 
-			// Calculate intersection depth on each axis
+
 			float overlapX = std::min(playerRect.left + playerRect.width, obstacleRect.left + obstacleRect.width) -
 				std::max(playerRect.left, obstacleRect.left);
 			float overlapY = std::min(playerRect.top + playerRect.height, obstacleRect.top + obstacleRect.height) -
@@ -521,14 +590,14 @@ void GameProject::sCollisions()
 
 			// Push back in the direction of least resistance
 			if (overlapX < overlapY) {
-				// Horizontal collision
+
 				if (playerTransform.pos.x < obstacle.x + obstacle.width / 2)
 					pushback.x = -overlapX;
 				else
 					pushback.x = overlapX;
 			}
 			else {
-				// Vertical collision
+
 				if (playerTransform.pos.y < obstacle.y + obstacle.height / 2)
 					pushback.y = -overlapY;
 				else
@@ -538,8 +607,7 @@ void GameProject::sCollisions()
 			// Apply pushback
 			playerTransform.pos += pushback;
 
-			// If we're still in collision after pushback, revert to previous position
-			// This is a safety check in case the pushback calculation has issues
+
 			sf::FloatRect newPlayerRect(playerTransform.pos.x - playerBox.halfSize.x,
 				playerTransform.pos.y - playerBox.halfSize.y,
 				playerBox.size.x, playerBox.size.y);
@@ -564,6 +632,7 @@ void GameProject::sUpdate(sf::Time dt)
 				_showSwitchMessage = false;
 				_currentPlayer = 2;
 				resetLapProgress();
+				resetRaceState();
 				m_countdownTime = 3.0f; // Reset countdown
 				m_timerActive = false;
 				_isPaused = false;
@@ -578,6 +647,9 @@ void GameProject::sUpdate(sf::Time dt)
 				// Could transition to menu or next level here
 			}
 		}
+
+
+
 
 		// Handle game over message display
 		if (_showGameOverMessage) {
@@ -608,6 +680,7 @@ void GameProject::sUpdate(sf::Time dt)
 
 	if (m_countdownTime > 0.0f)
 	{
+
 		m_countdownTime -= dt.asSeconds();
 		if (m_countdownTime <= 0.0f && !m_timerActive)
 		{
@@ -617,6 +690,8 @@ void GameProject::sUpdate(sf::Time dt)
 		}
 
 		int countdown = static_cast<int>(std::ceil(m_countdownTime));
+
+
 		if (countdown == 3)
 			m_countdownText.setFillColor(sf::Color::Red);
 		else if (countdown == 2)
@@ -638,10 +713,11 @@ void GameProject::sUpdate(sf::Time dt)
 			_showGameOverMessage = true;
 			_gameOverMessageDuration = 3.0f;
 			std::cout << "Time's up! Race Over." << std::endl;
+			SoundPlayer::getInstance().play("GameOver");
 		}
 
 		m_countdownText.setString("Time: " + std::to_string(static_cast<int>(m_raceTime)));
-		
+
 		m_countdownText.setFillColor(sf::Color::White);
 	}
 
@@ -836,12 +912,7 @@ void GameProject::annimatePlayer()
 
 }
 
-//bool checkCollision(Player player, Barrel barrel) {
-//	return (player.x < barrel.x + barrel.width &&
-//		player.x + player.width > barrel.x &&
-//		player.y < barrel.y + barrel.height &&
-//		player.y + player.height > barrel.y);
-//}
+
 
 void GameProject::spawnBarrel()
 {
@@ -1045,49 +1116,7 @@ void GameProject::startAnimation(sPtrEntt e, std::string animation) {
 
 
 
-//void GameProject::handleBarking()
-//{
-//	if (!_player || _barrels.empty()) return;
-//
-//	// Get player position
-//	sf::Vector2f playerPos = _player->getComponent<CTransform>().pos;
-//
-//	// Find the nearest barrel
-//	std::shared_ptr<Entity> nearestBarrel = nullptr;
-//	float nearestDistance = std::numeric_limits<float>::max();
-//
-//	for (auto& barrel : _barrels)
-//	{
-//		sf::Vector2f barrelPos = barrel->getComponent<CTransform>().pos;
-//
-//		// Calculate distance between player and barrel using Pythagorean theorem
-//		float distance = std::hypot(barrelPos.x - playerPos.x, barrelPos.y - playerPos.y);
-//
-//		// Update nearest barrel if this is closer
-//		if (distance < nearestDistance)
-//		{
-//			nearestDistance = distance;
-//			nearestBarrel = barrel;
-//		}
-//	}
-//
-//	// If a nearest barrel is found, remove it and play explosion sound
-//	if (nearestBarrel)
-//	{
-//		// Remove the nearest barrel from the list
-//		auto it = std::find(_barrels.begin(), _barrels.end(), nearestBarrel);
-//		if (it != _barrels.end())
-//		{
-//			_barrels.erase(it);
-//		}
-//
-//		// Destroy the barrel entity
-//		nearestBarrel->destroy();
-//
-//		// Play explosion sound
-//		SoundPlayer::getInstance().play("Explosion1");
-//	}
-//}
+
 
 void GameProject::adjustPlayerPosition()
 {
@@ -1146,12 +1175,6 @@ void GameProject::init(const std::string& levelPath)
 	m_timerActive = false;
 
 
-
-
-
-
-
-
 	m_countdownText.setFont(Assets::getInstance().getFont("main"));
 	m_countdownText.setCharacterSize(30);
 	m_countdownText.setFillColor(sf::Color::Red);
@@ -1198,7 +1221,7 @@ void GameProject::loadLevel(const std::string& path)
 			auto& sprite = e->addComponent<CSprite>(Assets::getInstance().getTexture(name)).sprite;
 			sprite.setOrigin(0.f, 0.f);
 			sprite.setPosition(pos);
-			
+
 
 		}
 		else if (token == "World") {
@@ -1235,7 +1258,11 @@ void GameProject::sDoAction(const Command& command)
 
 		}
 		if (command.name() == "PAUSE") { setPaused(!_isPaused); }
-		else if (command.name() == "QUIT") { _game->quitLevel(); }
+		else if (command.name() == "QUIT") {
+			_currentPlayer = 1;
+			/*	m_game->setSelectedPlayer(1);*/
+			_game->quitLevel();
+		}
 		else if (command.name() == "BACK") { _game->backLevel(); }
 
 		else if (command.name() == "ZOOMOUT") { _worldView.zoom(1.5); }
@@ -1290,30 +1317,7 @@ void GameProject::spawnPlayerForLevel()
 	spawnPlayer(startPosition);
 }
 
-//void GameProject::drawTrafficLights(sf::RenderWindow& window)
-//{
-//	sf::CircleShape redLight(50);
-//	sf::CircleShape yellowLight(50);
-//	sf::CircleShape greenLight(50);
-//
-//	redLight.setFillColor(sf::Color(100, 0, 0)); // Dark red by default
-//	yellowLight.setFillColor(sf::Color(100, 100, 0)); // Dark yellow
-//	greenLight.setFillColor(sf::Color(0, 100, 0)); // Dark green
-//
-//	redLight.setPosition(900, 300);
-//	yellowLight.setPosition(900, 400);
-//	greenLight.setPosition(900, 500);
-//
-//	int countdown = static_cast<int>(std::ceil(m_countdownTime));
-//
-//	if (countdown == 3) redLight.setFillColor(sf::Color::Red);
-//	if (countdown == 2) yellowLight.setFillColor(sf::Color::Yellow);
-//	if (countdown == 1) greenLight.setFillColor(sf::Color::Green);
-//
-//	window.draw(redLight);
-//	window.draw(yellowLight);
-//	window.draw(greenLight);
-//}
+
 void GameProject::sRender()
 {
 	_game->window().setView(_worldView);
@@ -1375,9 +1379,9 @@ void GameProject::sRender()
 
 	// Render checkpoints
 	sf::RectangleShape checkpointShape;
-	checkpointShape.setFillColor(sf::Color(255, 0, 0, 100)); // Transparent red
-	checkpointShape.setOutlineColor(sf::Color::Red);
-	checkpointShape.setOutlineThickness(2.0f);
+	checkpointShape.setFillColor(sf::Color(0, 0, 0, 0)); // Transparent red
+	//checkpointShape.setOutlineColor(sf::Color::Red);
+	//checkpointShape.setOutlineThickness(2.0f);
 
 	for (const auto& checkpoint : _checkpoints)
 	{
@@ -1388,9 +1392,9 @@ void GameProject::sRender()
 
 	// Render finish line
 	sf::RectangleShape finishLineShape;
-	finishLineShape.setFillColor(sf::Color(0, 255, 0, 100)); // Transparent green
-	finishLineShape.setOutlineColor(sf::Color::Green);
-	finishLineShape.setOutlineThickness(2.0f);
+	finishLineShape.setFillColor(sf::Color(0, 0, 0, 0)); // Transparent green
+	/*finishLineShape.setOutlineColor(sf::Color::Green);
+	finishLineShape.setOutlineThickness(2.0f);*/
 	finishLineShape.setPosition(_finishLine.left, _finishLine.top);
 	finishLineShape.setSize(sf::Vector2f(_finishLine.width, _finishLine.height));
 	_game->window().draw(finishLineShape);
@@ -1401,8 +1405,10 @@ void GameProject::sRender()
 	int minutes = 0;
 	int seconds = 0;
 	int milliseconds = 0;
-
+	//MusicPlayer::getInstance().play("Countdown");
 	if (m_countdownTime > 0.0f) {
+
+
 		// During countdown, just show the countdown
 		minutes = 0;
 		seconds = static_cast<int>(ceil(m_countdownTime));
@@ -1410,10 +1416,12 @@ void GameProject::sRender()
 	}
 	else {
 		// After race starts, show the race time
+
 		minutes = static_cast<int>(m_raceTime) / 60;
 		seconds = static_cast<int>(m_raceTime) % 60;
 		milliseconds = static_cast<int>((m_raceTime - static_cast<int>(m_raceTime)) * 1000);
 	}
+
 
 	std::ostringstream timeStream;
 	timeStream << std::setfill('0') << std::setw(2) << minutes << ":"
@@ -1425,19 +1433,20 @@ void GameProject::sRender()
 	timerPanel.setFillColor(sf::Color(0, 0, 0, 180)); // Semi-transparent black
 	timerPanel.setOutlineColor(sf::Color(255, 255, 255, 100)); // Subtle white outline
 	timerPanel.setOutlineThickness(2);
-	timerPanel.setPosition((_game->window().getSize().x - timerPanel.getSize().x) -200, 60); // Top center
+	timerPanel.setPosition((_game->window().getSize().x - timerPanel.getSize().x) - 200, 30); // Top center
 	_game->window().draw(timerPanel);
 
 	// Handle countdown vs regular timer display
 	_timerText.setCharacterSize(36);
 	if (m_countdownTime > 0.0f) {
+
 		// During countdown phase
 		_timerText.setString(std::to_string(static_cast<int>(ceil(m_countdownTime))));
 		_timerText.setFillColor(sf::Color::Red);
 		_timerText.setCharacterSize(72);
 	}
 	else {
-		// Race has started - show time (which can be extended by checkpoints)
+		// Race has started - show time
 		_timerText.setString("Time: " + timeStream.str());
 		_timerText.setFillColor(sf::Color::White);
 	}
@@ -1445,8 +1454,8 @@ void GameProject::sRender()
 	// Center timer text
 	sf::FloatRect timerTextBounds = _timerText.getLocalBounds();
 	_timerText.setPosition(
-		timerPanel.getPosition().x + (timerPanel.getSize().x - timerTextBounds.width) / 2,
-		timerPanel.getPosition().y + (timerPanel.getSize().y - timerTextBounds.height) / 2 - 20
+		timerPanel.getPosition().x + 20, // Padding from the left of the panel
+		timerPanel.getPosition().y + (timerPanel.getSize().y - timerTextBounds.height) / 2 - 8
 	);
 	_game->window().draw(_timerText);
 
@@ -1455,7 +1464,7 @@ void GameProject::sRender()
 	barkPanel.setFillColor(sf::Color(0, 0, 0, 180));
 	barkPanel.setOutlineColor(sf::Color(255, 255, 255, 100));
 	barkPanel.setOutlineThickness(2);
-	barkPanel.setPosition(_game->window().getSize().x - barkPanel.getSize().x - 10, 10); // Top right
+	barkPanel.setPosition(_game->window().getSize().x - barkPanel.getSize().x - 35, 30); // Top right
 	_game->window().draw(barkPanel);
 
 	// Prepare bark text
@@ -1479,7 +1488,7 @@ void GameProject::sRender()
 	else {
 		// If no icon
 		_barkText.setPosition(
-			barkPanel.getPosition().x + 10,
+			barkPanel.getPosition().x + 20,
 			barkPanel.getPosition().y + (barkPanel.getSize().y - _barkText.getLocalBounds().height) / 2 - 8
 		);
 	}
@@ -1511,6 +1520,7 @@ void GameProject::sRender()
 
 	// 4. Big Countdown Display (if active)
 	if (m_countdownTime > 0.0f) {
+		/*MusicPlayer::getInstance().play("Countdown");*/
 		// Background darkening effect
 		sf::RectangleShape overlay(sf::Vector2f(_game->window().getSize().x, _game->window().getSize().y));
 		overlay.setFillColor(sf::Color(0, 0, 0, 150));
@@ -1528,34 +1538,97 @@ void GameProject::sRender()
 		_game->window().draw(_countdownText);
 	}
 
-	// 5. "GO!" message when countdown just finished
-	if (m_countdownTime <= 0.0f && m_countdownTime > -1.0f) {
-		// Assuming the countdown just ended and we want to show GO! for 1 second
+
+
+
+	// Check if countdown just hit zero (transition from positive to zero/negative)
+	if (m_prevCountdownTime > 0.0f && m_countdownTime <= 0.0f) {
+		m_goDisplayTime = 3.0f; // Set display time to 3 seconds
+		std::cout << "GO message triggered! Display time set to " << m_goDisplayTime << std::endl;
+	}
+
+	// Save current countdown time for next frame comparison
+	m_prevCountdownTime = m_countdownTime;
+
+	// Display the GO message while active
+	if (m_goDisplayTime > 0.0f) {
+		// Calculate alpha based on fade in/out effect
+		float alpha = 255.0f;
+
+		// First second: fade in (3.0 to 2.0 seconds)
+		if (m_goDisplayTime > 2.0f) {
+			float fadeInProgress = 3.0f - m_goDisplayTime; // 0->1 over first second
+			alpha = fadeInProgress * 255.0f;
+		}
+		// Last second: fade out (1.0 to 0.0 seconds)
+		else if (m_goDisplayTime < 1.0f) {
+			float fadeOutProgress = m_goDisplayTime; // 1->0 over last second
+			alpha = fadeOutProgress * 255.0f;
+		}
+
+		// Clamp alpha to valid range
+		alpha = std::max(0.0f, std::min(255.0f, alpha));
+
+		// Create and render the GO text
 		sf::Text goText;
 		goText.setFont(_uiFont);
 		goText.setString("GO!");
 		goText.setCharacterSize(100);
-		goText.setFillColor(sf::Color::Green);
-		goText.setOutlineColor(sf::Color::White);
+		goText.setFillColor(sf::Color(0, 255, 0, static_cast<sf::Uint8>(alpha)));
+		goText.setOutlineColor(sf::Color(255, 255, 255, static_cast<sf::Uint8>(alpha)));
 		goText.setOutlineThickness(3.0f);
-
-		// Center the GO! text
 		sf::FloatRect goBounds = goText.getLocalBounds();
 		goText.setOrigin(goBounds.left + goBounds.width / 2.0f,
 			goBounds.top + goBounds.height / 2.0f);
-		goText.setPosition(_game->window().getSize().x / 2.0f, _game->window().getSize().y / 2.0f);
-
+		goText.setPosition(_game->window().getSize().x / 2.0f,
+			_game->window().getSize().y / 2.0f);
 		_game->window().draw(goText);
+
+		// FIXED: Use a minimum delta time to ensure animation progresses
+		float dt = _game->deltaTime().asSeconds();
+		if (dt <= 0.0001f) {
+			dt = 0.016f; // Default to ~60 FPS if delta time is zero
+			std::cout << "Warning: Zero delta time detected, using default value" << std::endl;
+		}
+
+		// Decrease display time and ensure it stops at zero
+		m_goDisplayTime -= dt;
+		if (m_goDisplayTime <= 0.0f) {
+			m_goDisplayTime = 0.0f;
+			std::cout << "GO animation complete" << std::endl;
+		}
 	}
+
+
 
 	// 6. Display time bonus notification when checkpoints are reached
 	if (_showTimeBonus) {
+		// Calculate alpha based on fade in/out effect
+		float alpha = 255.0f;
+
+		// Assuming _timeBonusDisplayTime starts at 3.0f like the GO message
+		float totalBonusDisplayTime = 3.0f;
+
+		// First second: fade in (3.0 to 2.0 seconds)
+		if (_timeBonusDisplayTime > (totalBonusDisplayTime - 1.0f)) {
+			float fadeInProgress = totalBonusDisplayTime - _timeBonusDisplayTime; // 0->1 over first second
+			alpha = fadeInProgress * 255.0f;
+		}
+		// Last second: fade out (1.0 to 0.0 seconds)
+		else if (_timeBonusDisplayTime < 1.0f) {
+			float fadeOutProgress = _timeBonusDisplayTime; // 1->0 over last second
+			alpha = fadeOutProgress * 255.0f;
+		}
+
+		// Clamp alpha to valid range
+		alpha = std::max(0.0f, std::min(255.0f, alpha));
+
 		sf::Text bonusText;
 		bonusText.setFont(_uiFont);
-		bonusText.setString("+" + std::to_string(_lastTimeBonus) + "s");
+		bonusText.setString("+" + std::to_string(static_cast<int>(_lastTimeBonus)) + "s");
 		bonusText.setCharacterSize(48);
-		bonusText.setFillColor(sf::Color::Yellow);
-		bonusText.setOutlineColor(sf::Color::Black);
+		bonusText.setFillColor(sf::Color(255, 255, 0, static_cast<sf::Uint8>(alpha))); // Yellow with alpha
+		bonusText.setOutlineColor(sf::Color(0, 0, 0, static_cast<sf::Uint8>(alpha))); // Black outline with alpha
 		bonusText.setOutlineThickness(2.0f);
 
 		// Position the bonus notification
@@ -1568,8 +1641,14 @@ void GameProject::sRender()
 		_game->window().draw(bonusText);
 
 		// Update the bonus notification timer
-		_timeBonusDisplayTime -= _game->deltaTime().asSeconds(); // Changed from deltaTime() to frameDeltaTime()
+		float dt = _game->deltaTime().asSeconds();
+		if (dt <= 0.0001f) {
+			dt = 0.016f; // Default to ~60 FPS if delta time is zero
+		}
+
+		_timeBonusDisplayTime -= dt;
 		if (_timeBonusDisplayTime <= 0.0f) {
+			_timeBonusDisplayTime = 0.0f;
 			_showTimeBonus = false;
 		}
 	}
@@ -1648,35 +1727,48 @@ void GameProject::sRender()
 
 		_game->window().draw(winnerText);
 	}
+	// Create player panel in the top left
+	sf::RectangleShape playerPanel(sf::Vector2f(150, 50));
+	playerPanel.setFillColor(sf::Color(0, 0, 0, 180));          // Semi-transparent black
+	playerPanel.setOutlineColor(sf::Color(255, 255, 255, 100)); // Semi-transparent white outline
+	playerPanel.setOutlineThickness(2);
+	playerPanel.setPosition(35, 70); // Top left with the same margins (35px from left, 60px from top)
+	_game->window().draw(playerPanel);
 
-	// 7. Display current player indicator
-	sf::Text playerIndicator;
-	playerIndicator.setFont(_uiFont);
-	playerIndicator.setString("Player " + std::to_string(_currentPlayer));
-	playerIndicator.setCharacterSize(36);
-	playerIndicator.setFillColor(sf::Color::White);
-	playerIndicator.setOutlineColor(sf::Color::Black);
-	playerIndicator.setOutlineThickness(1.0f);
-	playerIndicator.setPosition(10, _game->window().getSize().y - 50);
-	_game->window().draw(playerIndicator);
+	// Display player indicator inside the panel
+	sf::Text playerText;
+	playerText.setFont(_uiFont);
+	playerText.setString("Player " + std::to_string(_currentPlayer));
+	playerText.setCharacterSize(24); // Slightly smaller to fit nicely in the panel
+	playerText.setFillColor(sf::Color::White);
+	playerText.setOutlineColor(sf::Color::Black);
+	playerText.setOutlineThickness(1.0f);
+
+	// Center the text in the panel
+	float textX = playerPanel.getPosition().x + (playerPanel.getSize().x - playerText.getLocalBounds().width) / 2;
+	float textY = playerPanel.getPosition().y + (playerPanel.getSize().y - playerText.getLocalBounds().height) / 2 - 5;
+	playerText.setPosition(textX, textY);
+
+	_game->window().draw(playerText);
 
 	//sf::RectangleShape checkpointShape;
 	for (size_t i = 0; i < _checkpoints.size(); i++) {
 		// Color based on checkpoint status: green if reached, red if current, yellow if future
 		if (_checkpoints[i].reached) {
-			checkpointShape.setFillColor(sf::Color(0, 255, 0, 100)); // Green for reached
-			checkpointShape.setOutlineColor(sf::Color::Green);
+			//SoundPlayer::getInstance().play("Checkpoint");
+			checkpointShape.setFillColor(sf::Color(0, 0, 0, 0)); // Green for reached
+			//checkpointShape.setOutlineColor(sf::Color::Green);
 		}
 		else if (i == _currentCheckpoint) {
-			checkpointShape.setFillColor(sf::Color(255, 0, 0, 100)); // Red for current
-			checkpointShape.setOutlineColor(sf::Color::Red);
+			checkpointShape.setFillColor(sf::Color(0, 0, 0, 0)); // Red for current
+			//checkpointShape.setOutlineColor(sf::Color::Red);
 		}
 		else {
-			checkpointShape.setFillColor(sf::Color(255, 255, 0, 100)); // Yellow for future
-			checkpointShape.setOutlineColor(sf::Color::Yellow);
+			checkpointShape.setFillColor(sf::Color(0, 0, 0, 0)); // Yellow for future
+			//checkpointShape.setOutlineColor(sf::Color::Yellow);
 		}
 
-		checkpointShape.setOutlineThickness(2.0f);
+		//checkpointShape.setOutlineThickness(2.0f);
 		checkpointShape.setPosition(_checkpoints[i].area.left, _checkpoints[i].area.top);
 		checkpointShape.setSize(sf::Vector2f(_checkpoints[i].area.width, _checkpoints[i].area.height));
 		_game->window().draw(checkpointShape);
@@ -1751,4 +1843,6 @@ void GameProject::initUI()
 	_barkIcon.setTexture(_barkIconTexture);
 	_barkIcon.setScale(0.5f, 0.5f);
 }
+
+
 

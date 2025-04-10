@@ -16,7 +16,7 @@ class Scene
 
 protected:
 
-	GameEngine*		_game;
+	GameEngine* _game;
 	EntityManager	_entityManager;
 	CommandMap		_commands;
 	bool			_isPaused{ false };

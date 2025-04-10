@@ -6,6 +6,7 @@
 #include <memory>
 #include <cstdlib>
 #include <iostream>
+#include "SplashScreen.h"
 
 
 GameEngine::GameEngine(const std::string& path)
@@ -22,13 +23,14 @@ void GameEngine::init(const std::string& path)
 	loadConfigFromFile(path, width, height);
 
 
-	_window.create(sf::VideoMode(width, height), "Game Project - Guilherme Trentini");
+	_window.create(sf::VideoMode(width, height), "Pug Grand Prix - Guilherme Trentini");
 
 	_statisticsText.setFont(Assets::getInstance().getFont("main"));
 	_statisticsText.setPosition(15.0f, 5.0f);
 	_statisticsText.setCharacterSize(15);
 
 	changeScene("MENU", std::make_shared<Scene_Menu>(this));
+	changeScene("SPLASH", std::make_shared<SplashScreen>(this));
 }
 
 void GameEngine::loadConfigFromFile(const std::string& path, unsigned int& width, unsigned int& height) const {
@@ -135,12 +137,13 @@ void GameEngine::run()
 
 void GameEngine::quitLevel()
 {
-	changeScene("MENU", nullptr, true);
+
+	changeScene("SPLASH", nullptr, true);
 }
 
 void GameEngine::backLevel()
 {
-	changeScene("MENU", nullptr, false);
+	changeScene("SPLASH", nullptr, false);
 }
 
 
