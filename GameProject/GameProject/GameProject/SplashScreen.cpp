@@ -104,7 +104,7 @@ void SplashScreen::init()
     _storyText.setString(
         "In the town of Puggington, the annual \"Pug Grand Prix\" has become legendary.\n"
         "Train your pug to navigate obstacles and race for the fastest time!\n"
-        "Compete on Puggington Park, Sunny Beach or Snowing tracks."
+        "Compete on Puggington Park for the best time!"
     );
     _storyText.setCharacterSize(30);
     _storyText.setFillColor(sf::Color(200, 200, 200));

@@ -165,41 +165,6 @@ GameProject::GameProject(GameEngine* gameEngine, const std::string& levelPath)
 }
 
 
-//void GameProject::resetForPlayer2()
-//{
-//	// Reset barrels
-//	_barrelsSpawned = false;
-//	for (auto& barrel : _barrels) {
-//		if (barrel && barrel->isActive()) {
-//			barrel->destroy();
-//		}
-//	}
-//	_barrels.clear();
-//
-//	// Reset bones
-//	_bonesSpawned = false;
-//	for (auto& bone : _bones) {
-//		if (bone && bone->isActive()) {
-//			bone->destroy();
-//		}
-//	}
-//	_bones.clear();
-//
-//	// Reset bark counter
-//	_barkCounter = 0;
-//
-//	// Reset race timer
-//	m_countdownTime = 3.0f;
-//	m_timerActive = false;
-//	m_raceTime = 50.0f;  // Same as Player 1
-//
-//	// Reset lap progress
-//	resetLapProgress();
-//
-//	// Reset player state
-//	_playerSpeedBoost = false;
-//	_speedBoostTimer = 0.0f;
-//}
 
 
 void GameProject::setupCheckpoints(const std::string& levelPath)
@@ -410,7 +375,7 @@ void GameProject::resetRaceState()
 	_barkCounter = 2;
 
 	// Reset timer
-	m_raceTime = 50.0f;
+	m_raceTime = 20.0f;
 	m_timerActive = false;
 
 	// Reset speed boost
@@ -482,35 +447,6 @@ void GameProject::sAnimation(sf::Time dt)
 	}
 }
 
-//for (auto e : _entityManager.getEntities()) {
-//	if (e->hasComponent<CAnimation>()) {
-//		auto& anim = e->getComponent<CAnimation>();
-//		anim.countDown -= dt; // Correct way to subtract sf::Time
-
-
-
-//		if (anim.countDown <= sf::Time::Zero) {
-//			anim.currentFrame++;
-//			anim.countDown = anim.timePerFrame;
-
-//			if (anim.currentFrame >= anim.numbFrames) {
-//				if (anim.isRepeat) {
-//					anim.currentFrame = 0;
-//				}
-//				else {
-//					e->destroy();  // Destroy explosion after animation ends
-//					continue;
-//				}
-//			}
-
-//			auto& sprite = e->getComponent<CSprite>().sprite;
-//			sprite.setTextureRect(sf::IntRect(
-//				anim.currentFrame * anim.frameSize.x, 0,
-//				anim.frameSize.x, anim.frameSize.y
-//			));
-//		}
-//	}
-//}
 
 
 
@@ -686,7 +622,7 @@ void GameProject::sUpdate(sf::Time dt)
 		{
 			m_countdownTime = 0.0f;
 			m_timerActive = true;
-			m_raceTime = 50.0f; // Set initial race time (adjust if needed)
+			m_raceTime = 20.0f; // Set initial race time (adjust if needed)
 		}
 
 		int countdown = static_cast<int>(std::ceil(m_countdownTime));
